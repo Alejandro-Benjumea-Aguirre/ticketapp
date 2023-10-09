@@ -1,9 +1,9 @@
 
-function httpError(req, res) {
+function httpError(res, e) {
 
     return res.status(500).json({
         status: false,
-        msg: res.msg
+        msg: e.msg
     });
 
 }

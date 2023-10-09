@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const db = require('../../config/postgresql');
 
-const User = db.define("user", {
+const User = db.define("users", {
 
     uid: {
         allowNull: false,
@@ -46,7 +46,7 @@ const User = db.define("user", {
         type: DataTypes.DATE,
         field: "created_date"
     },
-    updated_date: {
+    updatedAt: {
         type: DataTypes.DATE,
         field: "updated_date"
     }
