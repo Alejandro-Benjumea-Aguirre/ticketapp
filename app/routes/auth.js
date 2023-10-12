@@ -1,17 +1,15 @@
-const express = require('express');
+const express = require('express')
 const {
-    login,
-    newToken
-} = require('../controllers/auth');
+  login,
+  newToken
+} = require('../controllers/auth')
 
-const { validateJWT } = require('../middleware/index');
+const { validateJWT } = require('../middleware/index')
 
+const router = express.Router()
 
-const router = express.Router();
+router.post('/login', login)
 
-router.post('/login', login);
+router.post('/renew', validateJWT, newToken)
 
-router.post('/renew', validateJWT, newToken);
-
-
-module.exports = router;
+module.exports = router

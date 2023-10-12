@@ -2,8 +2,9 @@
   "name": "pana-ticket",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": ".eslintrc.js",
   "scripts": {
+    "lint:fix": "eslint --fix ./app/controllers/*.js",
     "dev": "nodemon app.js"
   },
   "author": "",
@@ -20,6 +21,11 @@
     "sequelize": "^6.33.0"
   },
   "devDependencies": {
+    "eslint": "^8.51.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-n": "^16.2.0",
+    "eslint-plugin-promise": "^6.1.1",
     "nodemon": "^3.0.1"
   }
 }
