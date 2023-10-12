@@ -35,7 +35,7 @@ class Server {
         this._app.use( cors());
 
         //Comprension de gzip
-        this._app.use(compression());
+        //this._app.use(compression());
 
         // lectura y parseo del body
         this._app.use( express.json() );

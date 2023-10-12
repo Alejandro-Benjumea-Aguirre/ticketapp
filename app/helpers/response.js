@@ -1,4 +1,4 @@
-exports.success = function (rep, res, message, status){
+exports.success = function (req, res, message, status){
     let statusCode = status || 200;
     let statusMessage = message || '';
 

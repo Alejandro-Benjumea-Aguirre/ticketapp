@@ -1,12 +1,17 @@
 const express = require('express');
 const {
-    login
+    login,
+    newToken
 } = require('../controllers/auth');
+
+const { validateJWT } = require('../middleware/index');
 
 
 const router = express.Router();
 
-router.post('/', login);
+router.post('/login', login);
+
+router.post('/renew', validateJWT, newToken);
 
 
 module.exports = router;
