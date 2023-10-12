@@ -1,12 +1,6 @@
 const { Router } = require('express')
 const { check } = require('express-validator')
-const {
-  getUsers,
-  getUser,
-  postUser,
-  patchUser,
-  deleteUser
-} = require('../controllers/users')
+const controllerUsers = require('../controllers/users')
 
 const { validateCampos, validateJWT } = require('../middleware/index')
 
@@ -18,9 +12,9 @@ const {
 
 const router = Router()
 
-router.get('/', validateJWT, getUsers)
+router.get('/', validateJWT, controllerUsers.getUsers)
 
-router.get('/:id', validateJWT, getUser)
+router.get('/:id', validateJWT, controllerUsers.getUser)
 
 router.post('/', [
   validateJWT,
@@ -42,12 +36,12 @@ router.post('/', [
     check('campus_id').custom(), */
   validateCampos
 ],
-postUser)
+controllerUsers.postUser)
 
 router.patch('/:id', [
   validateJWT
-], patchUser)
+], controllerUsers.patchUser)
 
-router.delete('/:id', validateJWT, deleteUser)
+router.delete('/:id', validateJWT, controllerUsers.deleteUser)
 
 module.exports = router
