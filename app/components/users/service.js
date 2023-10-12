@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt')
 
-const modelUser = require('../models/users')
+const modelUser = require('./model')
 
 const listAllUsers = async () => {
   return await modelUser.findAll()

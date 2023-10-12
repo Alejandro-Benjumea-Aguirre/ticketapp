@@ -1,7 +1,7 @@
 const { Router } = require('express')
 const { check } = require('express-validator')
-const controllerUsers = require('../controllers/users')
 
+const controllerUsers = require('../components/users/controller')
 const { validateCampos, validateJWT } = require('../middleware/index')
 
 const {
@@ -12,7 +12,7 @@ const {
 
 const router = Router()
 
-router.get('/', validateJWT, controllerUsers.getUsers)
+router.get('/', controllerUsers.getUsers)
 
 router.get('/:id', validateJWT, controllerUsers.getUser)
 

@@ -1,5 +1,5 @@
 const response = require('../helpers/response')
-const userModel = require('../models/users')
+const userModel = require('../components/users/model')
 const generarJWT = require('../helpers/generateJWT')
 
 const bcrypt = require('bcrypt')

@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken')
-const modelUser = require('../models/users')
+const modelUser = require('../components/users/model')
 const response = require('../helpers/response')
 
-export const validarJWT = async (req, res, next) => {
+const validarJWT = async (req, res, next) => {
   const token = req.header('x-token')
 
   if (!token) {
@@ -31,3 +31,5 @@ export const validarJWT = async (req, res, next) => {
     return response.error(req, res, 'Token no valido.', 401)
   }
 }
+
+module.exports = validarJWT
