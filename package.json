@@ -4,7 +4,7 @@
   "description": "",
   "main": ".eslintrc.js",
   "scripts": {
-    "lint:fix": "eslint --fix ./app/services/*.js",
+    "lint:fix": "eslint --fix ./app/components/auth/*.js",
     "dev": "nodemon app.js"
   },
   "author": "",

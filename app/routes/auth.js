@@ -2,7 +2,7 @@ const express = require('express')
 const {
   login,
   newToken
-} = require('../controllers/auth')
+} = require('../components/auth/controller')
 
 const { validateJWT } = require('../middleware/index')
 

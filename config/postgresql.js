@@ -20,14 +20,6 @@ const db = new Sequelize(
       min: 0,
       acquire: 30000,
       idle: 10000
-    },
-    dialectOptions: {
-      ssl: true,
-      native: true
-      /* {
-                require: true, // This will help you. But you will see nwe error
-                rejectUnauthorized: false // This line will fix new error
-            } */
     }
   }
 )
