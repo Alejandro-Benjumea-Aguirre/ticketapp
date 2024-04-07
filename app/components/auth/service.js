@@ -1,17 +1,13 @@
 const bcrypt = require('bcrypt')
 
-const modelUser = require('../users/model')
+const repositorieUser = require('../users/repositorie')
 const generarJWT = require('../../helpers/generateJWT')
 
 const login = async (username, password) => {
   // Verificacion si el usuario existe
-  const user = await modelUser.findOne({
-    where: {
-      username
-    }
-  })
+  const user = await repositorieUser.listByUsername(username)
   if (!user) {
-    return 'Usuario/password incorrectos.'
+    return 'Usuario/password incorrectos.1'
   }
 
   // Verificacion de password
@@ -33,7 +29,7 @@ const login = async (username, password) => {
 }
 
 const newToken = async (id) => {
-  const user = await modelUser.findByPk(id)
+  const user = await repositorieUser.listById(id)
 
   if (!user) {
     return 'Usuario no existe.'

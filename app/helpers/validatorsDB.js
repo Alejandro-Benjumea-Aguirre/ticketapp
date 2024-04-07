@@ -1,7 +1,7 @@
-const { modelUser } = require('../models/index')
+const repositorieUser = require('../components/users/repositorie')
 
 const isUserNameValid = async (username) => {
-  const isExistUsername = await modelUser.findBy({ username })
+  const isExistUsername = await repositorieUser.listByUsername(username)
 
   if (isExistUsername) {
     throw new Error('El username ya existe.')

@@ -4,10 +4,10 @@
   "description": "",
   "main": ".eslintrc.js",
   "scripts": {
-    "lint:fix": "eslint --fix ./app/components/auth/*.js",
+    "lint:fix": "eslint --fix ./app/components/users/*.js",
     "dev": "nodemon app.js"
   },
-  "author": "",
+  "author": "Alejandro",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -26,6 +26,7 @@
     "eslint-plugin-import": "^2.28.1",
     "eslint-plugin-n": "^16.2.0",
     "eslint-plugin-promise": "^6.1.1",
+    "jest": "^29.7.0",
     "nodemon": "^3.0.1"
   }
 }

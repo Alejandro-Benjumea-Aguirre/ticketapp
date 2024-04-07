@@ -1,18 +1,21 @@
-const { DataTypes } = require('sequelize')
-const db = require('../../../config/postgresql')
+const { Model, DataTypes } = require('sequelize')
+// const db = require('../../../config/postgresql')
 
-const User = db.define('users', {
+// const State = require('../states/model')
 
-  uid: {
+const USER_TABLE = 'users'
+
+const UserSchema = {
+  id: {
     allowNull: false,
     autoIncrement: true,
     primaryKey: true,
-    field: 'id',
     type: DataTypes.INTEGER
   },
   username: {
     allowNull: false,
-    type: DataTypes.STRING
+    type: DataTypes.STRING,
+    unique: true
   },
   name: {
     allowNull: false,
@@ -30,9 +33,14 @@ const User = db.define('users', {
     allowNull: false,
     type: DataTypes.INTEGER
   },
-  state_id: {
+  idStates: {
     allowNull: false,
-    type: DataTypes.INTEGER
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'States',
+      key: 'id'
+    },
+    field: 'status_id'
   },
   department_id: {
     allowNull: false,
@@ -50,7 +58,26 @@ const User = db.define('users', {
     type: DataTypes.DATE,
     field: 'updated_date'
   }
+}
 
-})
+class User extends Model {
+  static associate () {
+  }
 
-module.exports = User
+  static config (sequelize) {
+    return {
+      sequelize,
+      tableName: USER_TABLE,
+      modelName: 'User'
+    }
+  }
+}
+
+module.exports = { USER_TABLE, UserSchema, User }
+
+// Model.belongsTo(State, {
+//   foreignKey: 'id',
+//   targetKey: 'state_id'
+// })
+
+// module.exports = User

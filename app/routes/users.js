@@ -17,7 +17,7 @@ router.get('/', controllerUsers.getUsers)
 router.get('/:id', validateJWT, controllerUsers.getUser)
 
 router.post('/', [
-  validateJWT,
+  // validateJWT,
   check('uid', 'El uid es requerido.').not().isEmpty(),
   check('username', 'El username debe de ser string y es requerido.').not().isEmpty().isString(),
   check('name', 'El nombre debe de ser string y es requerido.').not().isEmpty().isString(),

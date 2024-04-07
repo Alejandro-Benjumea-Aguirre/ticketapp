@@ -1,13 +1,24 @@
 const bcrypt = require('bcrypt')
 
-const modelUser = require('./model')
+const repositorieUser = require('./repositorie')
 
 const listAllUsers = async () => {
-  return await modelUser.findAll()
+  const resp = []
+  const users = await repositorieUser.listAll()
+  users.forEach(user => {
+    resp.push({
+      username: user.username,
+      name: user.name,
+      email: user.email,
+      create_user: user.created_date,
+      update_user: user.updated_date
+    })
+  })
+  return resp
 }
 
 const listUser = async (id) => {
-  const user = await modelUser.findByPk(id)
+  const user = await repositorieUser.listById(id)
   if (user) {
     return user
   } else {
@@ -20,11 +31,9 @@ const createUser = async (body) => {
   const salt = bcrypt.genSaltSync()
   body.password = bcrypt.hashSync(body.password, salt)
 
-  const user = modelUser.build(body)
-  await user.save()
+  const user = await repositorieUser.created(body)
 
   return {
-    id: user.getDataValue('uid'),
     name: user.getDataValue('name'),
     username: user.getDataValue('username'),
     email: user.getDataValue('email')
@@ -37,34 +46,34 @@ const updateUser = async (id, password, body) => {
     body.password = bcrypt.hashSync(password, salt)
   }
 
-  const user = await modelUser.findByPk(id)
+  const user = await repositorieUser.listById(id)
 
   if (!user) {
     return `No existe un usuario con el id ${id}`
   }
 
-  await user.update(body)
+  const resp = await repositorieUser.updated(id, body)
 
   return {
-    name: user.getDataValue('name'),
-    username: user.getDataValue('username'),
-    email: user.getDataValue('email')
+    name: resp.getDataValue('name'),
+    username: resp.getDataValue('username'),
+    email: resp.getDataValue('email')
   }
 }
 
 const inactiveUser = async (id) => {
-  const user = await modelUser.findByPk(id)
+  const user = await repositorieUser.listById(id)
 
   if (!user) {
     return `No existe un usuario con el id: ${id}`
   }
 
-  await user.update({ state_id: 2 })
+  const resp = await repositorieUser.updated(id, { state_id: 2 })
 
   return {
-    name: user.getDataValue('name'),
-    username: user.getDataValue('username'),
-    email: user.getDataValue('email')
+    name: resp.getDataValue('name'),
+    username: resp.getDataValue('username'),
+    email: resp.getDataValue('email')
   }
 }
 

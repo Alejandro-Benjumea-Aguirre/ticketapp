@@ -10,7 +10,7 @@ const db = new Sequelize(
     host: process.env.HOST,
     dialect: 'postgres',
     protocol: 'postgres',
-    // logging: false
+    logging: false,
     /* define:{
             freezeTableName: true,
             timestamps: false

@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const modelUser = require('../components/users/model')
+const repositorieUser = require('../components/users/repositorie')
 const response = require('../helpers/response')
 
 const validarJWT = async (req, res, next) => {
@@ -10,16 +10,16 @@ const validarJWT = async (req, res, next) => {
   }
 
   try {
-    const { uid } = await jwt.verify(token, process.env.SECRETORPRIVATEKEY)
+    const { uid } = await jwt.verify(token, process.env.SECRETORPRIVATEDKEY)
 
-    const user = await modelUser.findByPk(uid)
+    const user = await repositorieUser.listById(uid)
 
     if (!user) {
       return response.error(req, res, 'Token no valido - usuario no existe.', 401)
     }
 
     // Verificar si el uid tiene estado true
-    if (!user.active) {
+    if (user.getDataValue('state_id') !== 1) {
       return response.error(req, res, 'Token no valido - usuario inactivo', 401)
     }
 

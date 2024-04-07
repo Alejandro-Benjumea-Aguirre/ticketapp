@@ -34,6 +34,9 @@ class Server {
     // Comprension de gzip
     // this._app.use(compression());
 
+    //
+    this._app.use(express.urlencoded({ extended: true }))
+
     // lectura y parseo del body
     this._app.use(express.json())
 
