@@ -1,29 +1,28 @@
 const bcrypt = require('bcrypt')
 
-const repositorieUser = require('../users/repositorie')
+const repositorieUser = require('../users/repositorieUser')
 const generarJWT = require('../../helpers/generateJWT')
 
 const login = async (username, password) => {
   // Verificacion si el usuario existe
   const user = await repositorieUser.listByUsername(username)
   if (!user) {
-    return 'Usuario/password incorrectos.1'
+    return 'Usuario/password incorrectos.'
   }
 
   // Verificacion de password
-  const validPassword = bcrypt.compareSync(password,
-    user.getDataValue('password'))
+  const validPassword = bcrypt.compareSync(password,user.password)
   if (!validPassword) {
     return 'Usuario/password incorrectos'
   }
 
   // Generar JWT
-  const token = await generarJWT(user.getDataValue('uid'))
+  const token = await generarJWT(user.uid)
 
   return {
-    name: user.getDataValue('name'),
-    username: user.getDataValue('username'),
-    email: user.getDataValue('email'),
+    name: user.name,
+    username: user.username,
+    email: user.geemail,
     token
   }
 }

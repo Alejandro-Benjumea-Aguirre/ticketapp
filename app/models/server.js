@@ -11,7 +11,7 @@ class Server {
     this._app = express()
     this._port = process.env.PORT || '8000'
 
-    this.dbConecction()
+    // this.dbConecction()
     this.middlewares()
 
     // Definir mis rutas
@@ -33,9 +33,6 @@ class Server {
 
     // Comprension de gzip
     // this._app.use(compression());
-
-    //
-    this._app.use(express.urlencoded({ extended: true }))
 
     // lectura y parseo del body
     this._app.use(express.json())

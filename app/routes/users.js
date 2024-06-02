@@ -1,47 +1,56 @@
 const { Router } = require('express')
 const { check } = require('express-validator')
+const { messages, messageValidator } = require('../helpers/response')
 
-const controllerUsers = require('../components/users/controller')
+const controllerUsers = require('../components/users/controllerUser')
 const { validateCampos, validateJWT } = require('../middleware/index')
+const upload = require('../helpers/uploadFile')
 
 const {
   isUserNameValid,
-  isValidPassword,
-  isValidEmail
+  isValidPassword
 } = require('../helpers/validatorsDB')
 
 const router = Router()
 
-router.get('/', controllerUsers.getUsers)
+router.get('/', validateJWT, controllerUsers.getUsers)
+//router.get('/', controllerUsers.getUsers)
 
-router.get('/:id', validateJWT, controllerUsers.getUser)
+router.get('/:id', controllerUsers.getUser)
+
+router.get('/:username', controllerUsers.getUserByUsername)
 
 router.post('/', [
-  // validateJWT,
-  check('uid', 'El uid es requerido.').not().isEmpty(),
-  check('username', 'El username debe de ser string y es requerido.').not().isEmpty().isString(),
-  check('name', 'El nombre debe de ser string y es requerido.').not().isEmpty().isString(),
-  check('password', 'El campo  es requerido y debe de ser inferiror a 16 caracteres.').isLength({ min: 8, max: 16 }),
-  check('email', 'El email no es valido.').isEmail(),
-  check('rol_id', 'El rol debe de ser numerico y es requerido.').not().isEmpty().isNumeric(),
-  check('state_id', 'El estado debe de ser numerico y requrido.').not().isEmpty().isNumeric(),
-  check('department_id', 'El departamento es requerido y debe de ser numerico.').not().isEmpty().isNumeric(),
-  check('campus_id', 'El campus es requerido y debe de ser numerico.').not().isEmpty().isNumeric(),
+  validateJWT,
+  check('uid', messageValidator(messages.required, 'uid')).not().isEmpty(),
+  check('username', messageValidator(messages.stringRequired, 'username')).not().isEmpty().isString(),
+  check('name', messageValidator(messages.stringRequired, 'name')).not().isEmpty().isString(),
+  check('email', messageValidator(messages.email, 'email')).isEmail(),
+  check('rol_id', messageValidator(messages.numberRequired, 'rol_id')).not().isEmpty().isNumeric(),
+  check('state_id', messageValidator(messages.numberRequired, 'state_id')).not().isEmpty().isNumeric(),
+  check('department_id', messageValidator(messages.numberRequired, 'department_id')).not().isEmpty().isNumeric(),
+  check('campus_id', messageValidator(messages.numberRequired, 'campus_id')).not().isEmpty().isNumeric(),
   check('username').custom(isUserNameValid),
   check('password').custom(isValidPassword),
-  check('email').custom(isValidEmail),
   /*     check('rol_id').custom(),
     check('state_id').custom(),
     check('department_id').custom(),
     check('campus_id').custom(), */
-  validateCampos
+  //validateCampos,
+  upload.single('file')
 ],
 controllerUsers.postUser)
 
 router.patch('/:id', [
-  validateJWT
+  validateJWT,
+  check('name', messageValidator(messages.stringRequired, 'name')).isString().optional(),
+  check('email', messageValidator(messages.email, 'email')).isEmail(),
+  check('password').custom(isValidPassword),
+  validateCampos
 ], controllerUsers.patchUser)
 
 router.delete('/:id', validateJWT, controllerUsers.deleteUser)
+
+router.post('/changepass', controllerUsers.changePass)
 
 module.exports = router

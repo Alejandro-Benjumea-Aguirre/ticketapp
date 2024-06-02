@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const repositorieUser = require('../components/users/repositorie')
+const repositorieUser = require('../components/users/repositorieUser')
 const response = require('../helpers/response')
 
 const validarJWT = async (req, res, next) => {
@@ -19,7 +19,7 @@ const validarJWT = async (req, res, next) => {
     }
 
     // Verificar si el uid tiene estado true
-    if (user.getDataValue('state_id') !== 1) {
+    if (user.state_id != 1 ) {
       return response.error(req, res, 'Token no valido - usuario inactivo', 401)
     }
 
