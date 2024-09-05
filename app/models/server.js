@@ -1,5 +1,6 @@
 const express = require('express')
 const cors = require('cors')
+const cookieParser = require('cookie-parser')
 
 const db = require('../../config/postgresql')
 
@@ -36,6 +37,7 @@ class Server {
 
     // lectura y parseo del body
     this._app.use(express.json())
+      this._app.use(cookieParser())
 
     // Carpeta publica
     this._app.use(express.static('public'))
