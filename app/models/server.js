@@ -1,22 +1,37 @@
-const express = require('express')
-const cors = require('cors')
-const cookieParser = require('cookie-parser')
+const express = require('express');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
+const compression = require('compression');
+const { rateLimit } = require('express-rate-limit');
 
-const db = require('../../config/postgresql')
+const db = require('../../config/postgresql');
 
 class Server {
-  _app
-  _port
+  #app
+  #port
+  #limiter
 
   constructor () {
-    this._app = express()
-    this._port = process.env.PORT || '8000'
+    this.#app = express()
+    this.#port = process.env.PORT || '8000'
+
+    // Conexion a la base de datos
+    this.dbConecction()
 
     // this.dbConecction()
     this.middlewares()
 
     // Definir mis rutas
     this.routes()
+
+    // definir la configuracion de rate limit
+    this.#limiter = rateLimit({
+      windowMs: 15*60*1000,
+      limit: 100,
+      message: 'Demasiadas solicitudes desde esta IP, por favor intenta más tarde.'
+    })
+
+    this.#app.use(this.#limiter);
   }
 
   async dbConecction () {
@@ -24,37 +39,40 @@ class Server {
       await db.authenticate()
       console.log('Database Online')
     } catch (error) {
-      throw new Error(error)
+      console.error('Error al conectar con la base de datos:', error);
+      process.exit(1); // Finalizar proceso si la base de datos no está disponible
     }
   }
 
   middlewares () {
     // cors
-    this._app.use(cors())
+    this.#app.use(cors())
 
     // Comprension de gzip
-    // this._app.use(compression());
+    this.#app.use(compression());
 
     // lectura y parseo del body
-    this._app.use(express.json())
-      this._app.use(cookieParser())
+    this.#app.use(express.json())
+    this.#app.use(cookieParser())
 
     // Carpeta publica
-    this._app.use(express.static('public'))
+    this.#app.use(express.static('public'))
     /* this.app.get('*', (req, res) => {
             res.sendFile( __dirname + '/public/404.html');
         }) */
+
   }
 
   routes () {
-    this._app.use('/api', require('../routes'))
+    this.#app.use('/api', require('../routes'))
   }
 
   listen () {
-    this._app.listen(this._port, () => {
-      console.log('Servidor corriendo en puerto ' + this._port)
+    this.#app.listen(this.#port, () => {
+      console.log('Servidor corriendo en puerto ' + this.#port)
     })
   }
 }
 
 module.exports = Server
+
