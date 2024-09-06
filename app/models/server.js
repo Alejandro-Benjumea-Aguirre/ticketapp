@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const compression = require('compression');
 const { rateLimit } = require('express-rate-limit');
 
+const connectMongoDB = require('../../config/mongodb');
 const db = require('../../config/postgresql');
 
 class Server {
@@ -42,6 +43,8 @@ class Server {
       console.error('Error al conectar con la base de datos:', error);
       process.exit(1); // Finalizar proceso si la base de datos no está disponible
     }
+
+    connectMongoDB();
   }
 
   middlewares () {
