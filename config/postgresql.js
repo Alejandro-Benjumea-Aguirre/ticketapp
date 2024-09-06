@@ -10,17 +10,26 @@ const db = new Sequelize(
     host: process.env.HOST,
     dialect: 'postgres',
     protocol: 'postgres',
-    logging: false,
+    logging: process.env.NODE_ENV === 'development' ? console.log : false,
     /* define:{
             freezeTableName: true,
             timestamps: false
         }, */
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    }
+   pool: {
+      max: 10,
+      min: 2,
+      acquire: 60000,
+      idle: 20000
+    },
+    // Habilitar si la BD esta en la nube
+    /*dialectOptions: {
+      ssl: true,
+      native: true
+       {
+                require: true, // This will help you. But you will see nwe error
+                rejectUnauthorized: false // This line will fix new error
+       }
+    }*/
   }
 )
 
