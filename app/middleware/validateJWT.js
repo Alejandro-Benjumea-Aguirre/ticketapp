@@ -3,7 +3,8 @@ const repositorieUser = require('../components/users/repositorieUser')
 const response = require('../helpers/response')
 
 const validarJWT = async (req, res, next) => {
-  const token = req.header('x-token')
+  //const token = req.header('x-token')
+  const token = req.cookies.access_token;
 
   if (!token) {
     return response.error(req, res, 'No existe token en la petición.', 401)
