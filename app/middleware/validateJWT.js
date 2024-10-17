@@ -19,7 +19,7 @@ const validarJWT = async (req, res, next) => {
       return response.error(req, res, 'Token no valido - usuario no existe.', 401)
     }
 
-    // Verificar si el uid tiene estado true
+    // Verificar si el user tiene estado true
     if (user.state_id != 1 ) {
       return response.error(req, res, 'Token no valido - usuario inactivo', 401)
     }
@@ -34,4 +34,3 @@ const validarJWT = async (req, res, next) => {
 }
 
 module.exports = validarJWT
-
