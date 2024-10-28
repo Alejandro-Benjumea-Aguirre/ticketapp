@@ -40,11 +40,17 @@ class Server {
       await db.authenticate()
       console.log('Database Online')
     } catch (error) {
-      console.error('Error al conectar con la base de datos:', error);
+      console.error('Error al conectar con la base de datos sql:', error);
       process.exit(1); // Finalizar proceso si la base de datos no está disponible
     }
 
-    connectMongoDB();
+    try {
+      await connectMongoDB();  
+    } catch (error) {
+      console.error('Error al conectar con la base de datos no sql:', error);
+      process.exit(1); // Finalizar proceso si la base de datos no está disponible
+    }
+    
   }
 
   middlewares () {
