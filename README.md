@@ -46,9 +46,6 @@ npm install
 cp .env.example .env
 # Editar .env con tus credenciales
 
-# 4. Ejecutar migraciones
-npm run migrate
-
 # 5. Iniciar el servidor
 npm run dev
 ```

@@ -1,13 +1,880 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Pana-Ticket</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TicketApp API</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:         #0d0d0f;
+      --bg2:        #13131a;
+      --bg3:        #1a1a26;
+      --border:     rgba(255,255,255,0.07);
+      --text:       #f0f0f5;
+      --muted:      #7a7a9a;
+      --accent:     #e94560;
+      --accent2:    #0f9b8e;
+      --accent3:    #f5a623;
+      --card-bg:    #16161f;
+      --shadow:     0 4px 32px rgba(0,0,0,0.5);
+      --radius:     14px;
+    }
+    [data-theme="light"] {
+      --bg:         #f4f4f8;
+      --bg2:        #ffffff;
+      --bg3:        #eaeaf2;
+      --border:     rgba(0,0,0,0.08);
+      --text:       #0d0d1a;
+      --muted:      #6b6b88;
+      --accent:     #d63351;
+      --accent2:    #0a8a7e;
+      --accent3:    #d4900a;
+      --card-bg:    #ffffff;
+      --shadow:     0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 64px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-logo span {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-link {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+      letter-spacing: 0.04em;
+    }
+    .nav-link:hover { color: var(--text); }
+
+    .btn-docs {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.15s;
+      letter-spacing: 0.02em;
+    }
+    .btn-docs:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    .theme-toggle {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .theme-toggle:hover { background: var(--bg2); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 4rem;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 100%);
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(233,69,96,0.12) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 760px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent2);
+      box-shadow: 0 0 6px var(--accent2);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .hero p {
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 560px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.15s, opacity 0.2s;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover { transform: translateY(-2px); opacity: 0.9; }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-secondary:hover { background: var(--bg3); transform: translateY(-2px); }
+
+    /* ── STATS ── */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-top: 4rem;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 2rem;
+      color: var(--text);
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* ── SECTION ── */
+    section {
+      position: relative;
+      z-index: 1;
+      padding: 5rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+      font-weight: 500;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+    }
+
+    .section-desc {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.8;
+      max-width: 540px;
+      margin-bottom: 3rem;
+    }
+
+    /* ── ROUTES GRID ── */
+    .routes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .route-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      cursor: default;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .route-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--card-accent, var(--accent));
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .route-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,0.13);
+      box-shadow: var(--shadow);
+    }
+
+    .route-card:hover::before { opacity: 1; }
+
+    .route-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: var(--bg3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .route-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .route-path {
+      font-size: 0.72rem;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+      font-weight: 500;
+    }
+
+    .route-desc {
+      font-size: 0.76rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .route-methods {
+      display: flex;
+      gap: 4px;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .method {
+      font-size: 0.62rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .method.get    { background: rgba(15,155,142,0.15); color: var(--accent2); }
+    .method.post   { background: rgba(245,166,35,0.15); color: var(--accent3); }
+    .method.patch  { background: rgba(100,130,255,0.15); color: #7b96ff; }
+    .method.delete { background: rgba(233,69,96,0.15); color: var(--accent); }
+
+    /* ── CONTACT ── */
+    .contact-section {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .contact-section section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .contact-cards {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 2.5rem;
+    }
+
+    .contact-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.4rem 2rem;
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      min-width: 220px;
+    }
+
+    .contact-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+      box-shadow: 0 8px 32px rgba(233,69,96,0.15);
+    }
+
+    .contact-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .contact-info strong {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: block;
+    }
+
+    .contact-info span {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    footer strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ── ANIMATIONS ── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.6s ease forwards;
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in:nth-child(1) { animation-delay: 0.1s; }
+    .fade-in:nth-child(2) { animation-delay: 0.2s; }
+    .fade-in:nth-child(3) { animation-delay: 0.3s; }
+    .fade-in:nth-child(4) { animation-delay: 0.4s; }
+    .fade-in:nth-child(5) { animation-delay: 0.5s; }
+    .fade-in:nth-child(6) { animation-delay: 0.6s; }
+    .fade-in:nth-child(7) { animation-delay: 0.7s; }
+    .fade-in:nth-child(8) { animation-delay: 0.8s; }
+    .fade-in:nth-child(9) { animation-delay: 0.9s; }
+    .fade-in:nth-child(10){ animation-delay: 1.0s; }
+    .fade-in:nth-child(11){ animation-delay: 1.1s; }
+    .fade-in:nth-child(12){ animation-delay: 1.2s; }
+    .fade-in:nth-child(13){ animation-delay: 1.3s; }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      nav { padding: 0 1.2rem; }
+      .nav-link { display: none; }
+      .stats { gap: 2rem; }
+      .contact-card { min-width: 100%; }
+    }
+  </style>
 </head>
 <body>
-    
-    <h1>Bienvenido a la API de Pana Ticket</h1>
 
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">
+      🎟️ TicketApp
+      <span>API v1.0</span>
+    </div>
+    <div class="nav-right">
+      <a href="#routes" class="nav-link">Endpoints</a>
+      <a href="#contact" class="nav-link">Contacto</a>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema" id="themeBtn">🌙</button>
+      <a href="documentacion.html" class="btn-docs">Ver Docs →</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+      <div class="hero-badge">REST API · Node.js · PostgreSQL · JWT</div>
+      <h1>
+        Backend para<br/>
+        gestión de <em>tickets</em><br/>
+        y soporte técnico
+      </h1>
+      <p>
+        API REST robusta construida con Node.js y Express, autenticación JWT,
+        roles y permisos, subida de archivos y bitácora de actividad.
+        Diseñada para equipos de soporte con múltiples clientes y sedes.
+      </p>
+      <div class="hero-actions">
+        <a href="documentacion.html" class="btn-primary">
+          📄 Ver Documentación
+        </a>
+        <a href="https://github.com/Alejandro-Benjumea-Aguirre/ticketapp" target="_blank" class="btn-secondary">
+          ⭐ GitHub
+        </a>
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-num">13</div>
+          <div class="stat-label">Módulos</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">50+</div>
+          <div class="stat-label">Endpoints</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">JWT</div>
+          <div class="stat-label">Auth</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">PG</div>
+          <div class="stat-label">Database</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ROUTES -->
+  <section id="routes">
+    <div class="section-label">Módulos de la API</div>
+    <h2 class="section-title">Endpoints disponibles</h2>
+    <p class="section-desc">
+      Cada módulo expone un conjunto de rutas RESTful protegidas con JWT.
+      Consulta la documentación completa para ver los parámetros y respuestas de cada endpoint.
+    </p>
+    <div class="routes-grid">
+
+      <div class="route-card fade-in" style="--card-accent:#e94560">
+        <div class="route-icon">🔐</div>
+        <div class="route-name">Auth</div>
+        <div class="route-path">/api/auth</div>
+        <div class="route-desc">Login, renovación de token JWT y flujo de recuperación de contraseña por email.</div>
+        <div class="route-methods">
+          <span class="method post">POST</span>
+        </div>
+      </div>
+
+      <div class="route-card fade-in" style="--card-accent:#0f9b8e">
+        <div class="route-icon">🎫</div>
+        <div class="route-name">Tickets</div>
+        <div class="route-path">/api/tickets</div>
+        <div class="route-desc">Gestión completa de tickets: abiertos, cerrados, en espera, filtrado por usuario y cierre.</div>
+        <div class="route-methods">
+          <span class="method get">GET</span>
+          <span class="method post">POST</span>
+          <span class="method patch">PATCH</span>
+        </div>
+      </div>
+
+      <div class="route-card fade-in" style="--card-accent:#7b96ff">
+        <div class="route-icon">💬</div>
+        <div class="route-name">Comments</div>
+        <div class="route-path">/api/ticketComment</div>
+        <div class="route-desc">Comentarios en tickets con soporte para subida de hasta 6 archivos adjuntos por comentario.</div>
+        <div class="route-methods">
+          <span class="method get">GET</span>
+          <span class="method post">POST</span>
+          <span class="method patch">PATCH</span>
+          <span class="method delete">DELETE</span>
+        </div>
+      </div>
+
+      <div class="route-card fade-in" style="--card-accent:#f5a623">
+        <div class="route-icon">👤</div>
+        <div class="route-name">Users</div>
+        <div class="route-path">/api/users</div>
+        <div class="route-desc">Registro, consulta, actualización y eliminación de usuarios. Soporta foto de perfil y cambio de contraseña.</div>
+        <div class="route-methods">
+          <span class="method get">GET</span>
+          <span class="method post">POST</span>
+          <span class="method patch">PATCH</span>
+          <span class="method delete">DELETE</span>
+        </div>
+      </div>
+
+      <div class="route-card fade-in" style="--card-accent:#e94560">
+        <div class="route-icon">🏢</div>
+        <div class="route-name">Customers</div>
+        <div class="route-path">/api/customers</div>
+        <div class="route-desc">Administración de clientes con búsqueda por ID y por nombre.</div>
+        <div class="route-methods">
+          <span class="method get">GET</span>
+          <span class="method post">POST</span>
+          <span class="method patch">PATCH</span>
+          <span class="method delete">DELETE</span>
+        </div>
+      </div>
+
+      <div class="route-card fade-in" style="--card-accent:#0f9b8e">
+        <div class="route-icon">📍</div>
+        <div class="route-name">Campus</div>
+        <div class="route-path">/api/campus</div>
+        <div class="route-desc">Gestión de sedes asociadas a clientes. Permite filtrar por nombre y por cliente.</div>
+        <div class="route-methods">
+          <span class="method get">GET</span>
+          <span class="method post">POST</span>
+          <span class="method patch">PATCH</span>
+          <span class="method delete">DELETE</span>
+        </div>
+      </div>
+
+      <div class="route-card fade-in" style="--card-accent:#7b96ff">
+        <div class="route-icon">📇</div>
+        <div class="route-name">Contacts</div>
+        <div class="route-path">/api/contacts</div>
+        <div class="route-desc">CRUD completo de contactos asociados a clientes o sedes del sistema.</div>
+        <div class="route-methods">
+          <span class="method get">GET</span>
+          <span class="method post">POST</span>
+          <span class="method patch">PATCH</span>
+          <span class="method delete">DELETE</span>
+        </div>
+      </div>
+
+      <div class="route-card fade-in" style="--card-accent:#f5a623">
+        <div class="route-icon">🛡️</div>
+        <div class="route-name">Roles</div>
+        <div class="route-path">/api/roles</div>
+        <div class="route-desc">Administración de roles del sistema con consulta de permisos asignados a cada rol.</div>
+        <div class="route-methods">
+          <span class="method get">GET</span>
+          <span class="method post">POST</span>
+          <span class="method patch">PATCH</span>
+          <span class="method delete">DELETE</span>
+        </div>
+      </div>
+
+      <div class="route-card fade-in" style="--card-accent:#e94560">
+        <div class="route-icon">🔑</div>
+        <div class="route-name">Permissions</div>
+        <div class="route-path">/api/permissions</div>
+        <div class="route-desc">Definición y gestión de permisos granulares asignables a roles de usuario.</div>
+        <div class="route-methods">
+          <span class="method get">GET</span>
+          <span class="method post">POST</span>
+          <span class="method patch">PATCH</span>
+          <span class="method delete">DELETE</span>
+        </div>
+      </div>
+
+      <div class="route-card fade-in" style="--card-accent:#0f9b8e">
+        <div class="route-icon">🏷️</div>
+        <div class="route-name">Type Users</div>
+        <div class="route-path">/api/typeUser</div>
+        <div class="route-desc">Gestión de tipos de usuario para clasificar los perfiles del sistema.</div>
+        <div class="route-methods">
+          <span class="method get">GET</span>
+          <span class="method post">POST</span>
+          <span class="method patch">PATCH</span>
+          <span class="method delete">DELETE</span>
+        </div>
+      </div>
+
+      <div class="route-card fade-in" style="--card-accent:#7b96ff">
+        <div class="route-icon">📋</div>
+        <div class="route-name">Preforms</div>
+        <div class="route-path">/api/preforms</div>
+        <div class="route-desc">Plantillas predefinidas para agilizar la creación de tickets con contenido reutilizable.</div>
+        <div class="route-methods">
+          <span class="method get">GET</span>
+          <span class="method post">POST</span>
+          <span class="method patch">PATCH</span>
+          <span class="method delete">DELETE</span>
+        </div>
+      </div>
+
+      <div class="route-card fade-in" style="--card-accent:#f5a623">
+        <div class="route-icon">📊</div>
+        <div class="route-name">Survey</div>
+        <div class="route-path">/api/survey</div>
+        <div class="route-desc">Encuestas de satisfacción asociadas a clientes para medir la calidad del soporte.</div>
+        <div class="route-methods">
+          <span class="method get">GET</span>
+          <span class="method post">POST</span>
+          <span class="method patch">PATCH</span>
+          <span class="method delete">DELETE</span>
+        </div>
+      </div>
+
+      <div class="route-card fade-in" style="--card-accent:#e94560">
+        <div class="route-icon">📒</div>
+        <div class="route-name">Bitácora</div>
+        <div class="route-path">/api/bitacora</div>
+        <div class="route-desc">Registro de actividad del sistema. Consulta y creación de logs de acciones por usuario.</div>
+        <div class="route-methods">
+          <span class="method get">GET</span>
+          <span class="method post">POST</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- CONTACT -->
+  <div class="contact-section" id="contact">
+    <section>
+      <div class="section-label">Desarrollador</div>
+      <h2 class="section-title">Alejandro Benjumea Aguirre</h2>
+      <p class="section-desc">
+        Ingeniero de sistemas fullstack con experiencia en backend Node.js, PHP/Laravel y bases de datos PostgreSQL.
+        Disponible para proyectos freelance y oportunidades laborales.
+      </p>
+      <div class="contact-cards">
+
+        <a href="https://www.linkedin.com/in/alejandro-benjumea-aguirre" target="_blank" class="contact-card">
+          <div class="contact-icon" style="background:rgba(10,102,194,0.15)">💼</div>
+          <div class="contact-info">
+            <strong>LinkedIn</strong>
+            <span>Alejandro Benjumea Aguirre</span>
+          </div>
+        </a>
+
+        <a href="https://github.com/Alejandro-Benjumea-Aguirre" target="_blank" class="contact-card">
+          <div class="contact-icon" style="background:rgba(255,255,255,0.07)">🐙</div>
+          <div class="contact-info">
+            <strong>GitHub</strong>
+            <span>@Alejandro-Benjumea-Aguirre</span>
+          </div>
+        </a>
+
+        <a href="https://www.alejodev.cloud" target="_blank" class="contact-card">
+          <div class="contact-icon" style="background:rgba(15,155,142,0.15)">🌐</div>
+          <div class="contact-info">
+            <strong>Portafolio</strong>
+            <span>alejodev.cloud</span>
+          </div>
+        </a>
+
+        <a href="mailto:alejo120792120792@hotmail.com" class="contact-card">
+          <div class="contact-icon" style="background:rgba(233,69,96,0.15)">✉️</div>
+          <div class="contact-info">
+            <strong>Email</strong>
+            <span>alejo120792120792@hotmail.com</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>Construido con ❤️ por <strong>Alejandro Benjumea Aguirre</strong> · Node.js · Express · PostgreSQL · JWT</p>
+    <p style="margin-top:6px">
+      <a href="documentacion.html" style="color:var(--accent);text-decoration:none">Ver documentación completa →</a>
+    </p>
+  </footer>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const btn  = document.getElementById('themeBtn');
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      btn.textContent = isDark ? '🌙' : '☀️';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+
+    // Restaurar tema guardado
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+      document.getElementById('themeBtn').textContent = saved === 'dark' ? '🌙' : '☀️';
+    }
+
+    // Intersection Observer para animar cards al hacer scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.route-card').forEach(card => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = 'opacity 0.5s ease, transform 0.5s ease, border-color 0.2s, box-shadow 0.2s';
+      observer.observe(card);
+    });
+  </script>
 </body>
 </html>

@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TicketApp API Docs</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui.min.css"/>
+  <style>
+    body { margin: 0; background: #1a1a2e; }
+    #swagger-ui .topbar { background: #16213e; }
+    #swagger-ui .topbar-wrapper img { display: none; }
+    #swagger-ui .topbar-wrapper::before {
+      content: "🎟️ TicketApp API";
+      color: #e94560;
+      font-size: 1.4rem;
+      font-weight: bold;
+      padding: 0 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-standalone-preset.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+  <script>
+    const yamlSpec = `
+openapi: 3.0.3
+info:
+  title: TicketApp API
+  description: |
+    REST API backend para gestión de tickets de eventos y soporte técnico.
+    
+    ## Autenticación
+    La mayoría de endpoints requieren un token JWT. Obténlo en \`POST /api/auth/login\`
+    y envíalo en el header \`Authorization: Bearer <token>\`.
+  version: 1.0.0
+  contact:
+    name: Alejandro Benjumea Aguirre
+    url: https://www.alejodev.cloud
+    email: alejo120792120792@hotmail.com
+
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor de desarrollo
+  - url: https://tu-dominio.com/api
+    description: Servidor de producción
+
+tags:
+  - name: Auth
+    description: Autenticación y manejo de tokens
+  - name: Tickets
+    description: Gestión de tickets de soporte
+  - name: Ticket Comments
+    description: Comentarios y archivos adjuntos en tickets
+  - name: Users
+    description: Gestión de usuarios
+  - name: Customers
+    description: Gestión de clientes
+  - name: Campus
+    description: Gestión de sedes/campus
+  - name: Contacts
+    description: Gestión de contactos
+  - name: Roles
+    description: Gestión de roles
+  - name: Permissions
+    description: Gestión de permisos
+  - name: Type Users
+    description: Tipos de usuario
+  - name: Preforms
+    description: Preformas y plantillas
+  - name: Survey
+    description: Encuestas
+  - name: Bitacora
+    description: Bitácora de actividad
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Not found
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          example: "123456"
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+            email:
+              type: string
+            name:
+              type: string
+    Ticket:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        priority_id:
+          type: integer
+        application_id:
+          type: integer
+        browser_id:
+          type: integer
+        sisope_id:
+          type: integer
+        subject:
+          type: string
+        description:
+          type: string
+        email:
+          type: string
+          format: email
+        status:
+          type: string
+          enum: [abierto, cerrado, enespera]
+        created_at:
+          type: string
+          format: date-time
+    TicketCreate:
+      type: object
+      required: [user_id, priority_id, application_id, browser_id, sisope_id, subject, description, email]
+      properties:
+        user_id:
+          type: integer
+          example: 1
+        priority_id:
+          type: integer
+          example: 2
+        application_id:
+          type: integer
+          example: 3
+        browser_id:
+          type: integer
+          example: 1
+        sisope_id:
+          type: integer
+          example: 1
+        subject:
+          type: string
+          example: Error al iniciar sesión
+        description:
+          type: string
+          example: No puedo ingresar con mis credenciales
+        email:
+          type: string
+          format: email
+          example: user@example.com
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+        ticket_id:
+          type: integer
+        user_id:
+          type: integer
+        comment:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        uid:
+          type: string
+        username:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        rol_id:
+          type: integer
+        state_id:
+          type: integer
+        department_id:
+          type: integer
+        campus_id:
+          type: integer
+    UserCreate:
+      type: object
+      required: [uid, username, name, email, rol_id, state_id, department_id, campus_id]
+      properties:
+        uid:
+          type: string
+          example: uid-abc-123
+        username:
+          type: string
+          example: alejandro.b
+        name:
+          type: string
+          example: Alejandro Benjumea
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        rol_id:
+          type: integer
+        state_id:
+          type: integer
+        department_id:
+          type: integer
+        campus_id:
+          type: integer
+
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Iniciar sesión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              \$ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                \$ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Credenciales inválidas
+  /auth/renew:
+    post:
+      tags: [Auth]
+      summary: Renovar token JWT
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Token renovado
+        '401':
+          description: Token inválido
+  /auth/sendtoken:
+    post:
+      tags: [Auth]
+      summary: Enviar token de recuperación al correo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Token enviado
+  /auth/comparetoken:
+    post:
+      tags: [Auth]
+      summary: Verificar token de recuperación
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+      responses:
+        '200':
+          description: Token válido
+        '400':
+          description: Token inválido
+  /tickets:
+    get:
+      tags: [Tickets]
+      summary: Listar todos los tickets
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de tickets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  \$ref: '#/components/schemas/Ticket'
+    post:
+      tags: [Tickets]
+      summary: Crear ticket (con archivos adjuntos, máx 6)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              \$ref: '#/components/schemas/TicketCreate'
+      responses:
+        '201':
+          description: Ticket creado
+        '400':
+          description: Datos inválidos
+  /tickets/abiertos:
+    get:
+      tags: [Tickets]
+      summary: Listar tickets abiertos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Tickets con estado abierto
+  /tickets/cerrados:
+    get:
+      tags: [Tickets]
+      summary: Listar tickets cerrados
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Tickets con estado cerrado
+  /tickets/enespera:
+    get:
+      tags: [Tickets]
+      summary: Listar tickets en espera
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Tickets con estado en espera
+  /tickets/{id}:
+    get:
+      tags: [Tickets]
+      summary: Obtener ticket por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Ticket encontrado
+        '404':
+          description: No encontrado
+    patch:
+      tags: [Tickets]
+      summary: Actualizar ticket
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Ticket actualizado
+  /tickets/close/{id}:
+    post:
+      tags: [Tickets]
+      summary: Cerrar ticket
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Ticket cerrado
+  /ticketComment:
+    post:
+      tags: [Ticket Comments]
+      summary: Crear comentario con adjuntos (máx 6 archivos)
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                ticket_id:
+                  type: integer
+                comment:
+                  type: string
+                file:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '201':
+          description: Comentario creado
+  /ticketComment/{id}:
+    get:
+      tags: [Ticket Comments]
+      summary: Obtener comentario por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Comentario encontrado
+    patch:
+      tags: [Ticket Comments]
+      summary: Actualizar comentario
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Actualizado
+    delete:
+      tags: [Ticket Comments]
+      summary: Eliminar comentario
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Eliminado
+  /users:
+    get:
+      tags: [Users]
+      summary: Listar usuarios
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de usuarios
+    post:
+      tags: [Users]
+      summary: Crear usuario (con foto de perfil)
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              \$ref: '#/components/schemas/UserCreate'
+      responses:
+        '201':
+          description: Usuario creado
+  /users/changepass:
+    post:
+      tags: [Users]
+      summary: Cambiar contraseña
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                token:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Contraseña actualizada
+  /users/{id}:
+    get:
+      tags: [Users]
+      summary: Obtener usuario por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Usuario encontrado
+    patch:
+      tags: [Users]
+      summary: Actualizar usuario
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Actualizado
+    delete:
+      tags: [Users]
+      summary: Eliminar usuario
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Eliminado
+  /customers:
+    get:
+      tags: [Customers]
+      summary: Listar clientes
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de clientes
+    post:
+      tags: [Customers]
+      summary: Crear cliente
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Creado
+  /customers/{id}:
+    get:
+      tags: [Customers]
+      summary: Obtener cliente por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cliente encontrado
+    patch:
+      tags: [Customers]
+      summary: Actualizar cliente
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Actualizado
+    delete:
+      tags: [Customers]
+      summary: Eliminar cliente
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Eliminado
+  /campus:
+    get:
+      tags: [Campus]
+      summary: Listar campus
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de campus
+    post:
+      tags: [Campus]
+      summary: Crear campus
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Creado
+  /campus/{id}:
+    get:
+      tags: [Campus]
+      summary: Obtener campus por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Campus encontrado
+    patch:
+      tags: [Campus]
+      summary: Actualizar campus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Actualizado
+    delete:
+      tags: [Campus]
+      summary: Eliminar campus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Eliminado
+  /contacts:
+    get:
+      tags: [Contacts]
+      summary: Listar contactos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de contactos
+    post:
+      tags: [Contacts]
+      summary: Crear contacto
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Creado
+  /contacts/{id}:
+    get:
+      tags: [Contacts]
+      summary: Obtener contacto por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Contacto encontrado
+    patch:
+      tags: [Contacts]
+      summary: Actualizar contacto
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Actualizado
+    delete:
+      tags: [Contacts]
+      summary: Eliminar contacto
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Eliminado
+  /roles:
+    get:
+      tags: [Roles]
+      summary: Listar roles
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de roles
+    post:
+      tags: [Roles]
+      summary: Crear rol
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Creado
+  /roles/permission/{id}:
+    get:
+      tags: [Roles]
+      summary: Obtener permisos de un rol
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Permisos del rol
+  /roles/{id}:
+    get:
+      tags: [Roles]
+      summary: Obtener rol por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Rol encontrado
+    patch:
+      tags: [Roles]
+      summary: Actualizar rol
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Actualizado
+    delete:
+      tags: [Roles]
+      summary: Eliminar rol
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Eliminado
+  /permissions:
+    get:
+      tags: [Permissions]
+      summary: Listar permisos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de permisos
+    post:
+      tags: [Permissions]
+      summary: Crear permiso
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Creado
+  /permissions/{id}:
+    get:
+      tags: [Permissions]
+      summary: Obtener permiso por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Permiso encontrado
+    patch:
+      tags: [Permissions]
+      summary: Actualizar permiso
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Actualizado
+    delete:
+      tags: [Permissions]
+      summary: Eliminar permiso
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Eliminado
+  /typeUser:
+    get:
+      tags: [Type Users]
+      summary: Listar tipos de usuario
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista
+    post:
+      tags: [Type Users]
+      summary: Crear tipo de usuario
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Creado
+  /typeUser/{id}:
+    get:
+      tags: [Type Users]
+      summary: Obtener tipo por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Encontrado
+    patch:
+      tags: [Type Users]
+      summary: Actualizar tipo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Actualizado
+    delete:
+      tags: [Type Users]
+      summary: Eliminar tipo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Eliminado
+  /preforms:
+    get:
+      tags: [Preforms]
+      summary: Listar preformas
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista
+    post:
+      tags: [Preforms]
+      summary: Crear preforma
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Creada
+  /preforms/{id}:
+    get:
+      tags: [Preforms]
+      summary: Obtener preforma por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Encontrada
+    patch:
+      tags: [Preforms]
+      summary: Actualizar preforma
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Actualizada
+    delete:
+      tags: [Preforms]
+      summary: Eliminar preforma
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Eliminada
+  /survey:
+    get:
+      tags: [Survey]
+      summary: Listar encuestas
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista
+    post:
+      tags: [Survey]
+      summary: Crear encuesta
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Creada
+  /survey/{id}:
+    get:
+      tags: [Survey]
+      summary: Obtener encuesta por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Encontrada
+    patch:
+      tags: [Survey]
+      summary: Actualizar encuesta
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Actualizada
+    delete:
+      tags: [Survey]
+      summary: Eliminar encuesta
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Eliminada
+  /bitacora/{id}:
+    get:
+      tags: [Bitacora]
+      summary: Obtener registros de bitácora
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Registros encontrados
+  /bitacora:
+    post:
+      tags: [Bitacora]
+      summary: Registrar en bitácora
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                action:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Registro creado
+`;
+
+    const spec = jsyaml.load(yamlSpec);
+
+    SwaggerUIBundle({
+      spec,
+      dom_id: '#swagger-ui',
+      presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+      layout: 'StandaloneLayout',
+      deepLinking: true,
+      persistAuthorization: true,
+      displayRequestDuration: true,
+      filter: true,
+    });
+  </script>
+</body>
+</html>
