@@ -1,4 +1,5 @@
 const repositoriePreform = require('./repositoriePreforms')
+const serviceBitacora = require('../bitacora/serviceBitacora')
 
 const listAllPreforms = async () => {
   const resp = await repositoriePreform.listAll()

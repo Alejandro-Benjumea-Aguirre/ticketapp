@@ -8,9 +8,9 @@ const router = Router()
 
 router.get('/', validateJWT, controllerCustomer.getCustomers)
 
-router.get('/:id', validateJWT, controllerCustomer.getCustomer)
+router.get('/name/:name', validateJWT, controllerCustomer.getCustomerByName)
 
-router.get('/:name', validateJWT, controllerCustomer.getCustomerByName)
+router.get('/:id', validateJWT, controllerCustomer.getCustomer)
 
 router.post('/', validateJWT, controllerCustomer.postCustomer)
 

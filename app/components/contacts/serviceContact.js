@@ -1,10 +1,11 @@
 const repositorieContact = require('./repositorieContact')
+const serviceBitacora = require('../bitacora/serviceBitacora')
 
 const listAllContact = async () => {
   const resp = await repositorieContact.listAll()
   const contacts = []
   resp.forEach(contact => {
-    contact.push({
+    contacts.push({
       name: contact.contacto,
       telefono: contact.phone,
       email: contact.email,
@@ -100,7 +101,7 @@ const updateContact = async (id, body) => {
   }
   const bitacora = await serviceBitacora.createBitacora(bodyBitacora)
 
-  if (cantidad > 0) {
+  if (contactUpdated > 0) {
     return {
       name: contactUpdated.name
     }

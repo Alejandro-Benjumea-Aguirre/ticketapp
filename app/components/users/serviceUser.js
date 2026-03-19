@@ -158,8 +158,9 @@ const changePass = async (newpass, username) => {
     return `No existe ningun usuario con el codigo ${username}`
   }
 
-  const password = newpass
-  const userUpdate = await repositorieUser.update(user.uid, password)
+  const salt = bcrypt.genSaltSync()
+  const password = bcrypt.hashSync(newpass, salt)
+  const userUpdate = await repositorieUser.update(user.uid, { password })
 
   if (userUpdate > 0) {
     return 'Se realizo la actualizacion de la contraseña correctamente.'

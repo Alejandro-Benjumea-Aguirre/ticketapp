@@ -9,7 +9,7 @@ const messages = {
 
 const messageValidator = function (typeMessage, field) {
   const messages = {
-    eequired: `${field} es requerido`,
+    required: `${field} es requerido`,
     stringRequired: `${field} debe ser string y es requerido`,
     numberRequired: `${field} debe ser númerico y es requerido`,
     string: `${field} debe ser string`,

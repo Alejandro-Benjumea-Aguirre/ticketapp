@@ -1,38 +1,34 @@
-# 🎟️ TicketApp API
+# TicketApp API
 
-REST API backend para la gestión de tickets de eventos. Permite a los usuarios registrarse, autenticarse y administrar tickets según su rol dentro del sistema.
-
----
-
-## 🚀 Tecnologías
-
-| Tecnología | Uso |
-|---|---|
-| **Node.js** | Runtime |
-| **Express** | Framework HTTP |
-| **PostgreSQL** | Base de datos relacional |
-| **JWT** | Autenticación y autorización |
-| **bcrypt** | Hash de contraseñas |
+REST API backend para la gestión de tickets de soporte técnico. Permite a los usuarios autenticarse y gestionar tickets, clientes, sedes, roles, permisos, encuestas, preformas y comentarios según su rol dentro del sistema.
 
 ---
 
-## ✨ Funcionalidades
+## Tecnologías
 
-- 🔐 **Autenticación JWT** — Registro, login y protección de rutas con tokens
-- 🎫 **CRUD de tickets** — Crear, consultar, actualizar y eliminar tickets de eventos
-- 👥 **Roles de usuario** — Control de acceso diferenciado (admin / usuario)
+| Tecnología | Versión | Uso |
+|---|---|---|
+| **Node.js** | >= 18 | Runtime |
+| **Express** | 4.18 | Framework HTTP |
+| **PostgreSQL** | >= 14 | Base de datos relacional (Sequelize ORM) |
+| **MongoDB** | >= 6 | Base de datos no relacional (Mongoose) |
+| **JWT** | — | Autenticación mediante cookies HTTP-only |
+| **bcrypt** | — | Hash de contraseñas |
+| **Multer** | — | Carga de archivos |
+| **Nodemailer** | — | Envío de correos electrónicos |
 
 ---
 
-## 📋 Requisitos previos
+## Requisitos previos
 
-- Node.js >= 18
-- PostgreSQL >= 14
-- npm o yarn
+- [Node.js](https://nodejs.org/) >= 18
+- [PostgreSQL](https://www.postgresql.org/) >= 14 en ejecución
+- [MongoDB](https://www.mongodb.com/) >= 6 en ejecución (local o Atlas)
+- npm >= 9
 
 ---
 
-## ⚙️ Instalación
+## Instalación
 
 ```bash
 # 1. Clonar el repositorio
@@ -44,91 +40,106 @@ npm install
 
 # 3. Configurar variables de entorno
 cp .env.example .env
-# Editar .env con tus credenciales
+# Editar .env con tus credenciales (ver sección Variables de entorno)
 
-# 5. Iniciar el servidor
+# 4. Iniciar el servidor en modo desarrollo
 npm run dev
 ```
 
+El servidor arranca por defecto en `http://localhost:8000`.
+
 ---
 
-## 🔑 Variables de entorno
+## Variables de entorno
 
-Crea un archivo `.env` en la raíz del proyecto:
+Crea el archivo `.env` en la raíz del proyecto con los siguientes valores:
 
 ```env
-PORT=3000
-DB_HOST=localhost
-DB_PORT=5432
+# Puerto del servidor (por defecto 8000)
+PORT=8000
+
+# URL base (opcional, para documentación)
+PORT_URL=http://localhost:8000
+
+# Base de datos PostgreSQL
+HOST=localhost
 DB_NAME=ticketapp
 DB_USER=postgres
 DB_PASSWORD=tu_password
-JWT_SECRET=tu_secreto_jwt
-JWT_EXPIRES_IN=3600
+
+# Base de datos MongoDB
+MONGO_URI=mongodb://localhost:27017/ticketapp
+
+# Entorno de ejecución: development | production
+NODE_ENV=development
+
+# Clave secreta para firmar los JWT
+SECRETORPRIVATEDKEY=una_clave_secreta_muy_larga_y_segura
+
+# Configuración del servidor de correo SMTP
+SMTP_HOST=smtp.tuservidor.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=correo@tudominio.com
+SMTP_PASS=tu_password_de_correo
 ```
 
----
-
-## 📡 Endpoints
-
-### Auth
-
-| Método | Ruta | Descripción | Auth |
-|--------|------|-------------|------|
-| `POST` | `/api/auth/register` | Registro de usuario | ❌ |
-| `POST` | `/api/auth/login` | Login y obtención de token | ❌ |
-
-### Tickets
-
-| Método | Ruta | Descripción | Auth |
-|--------|------|-------------|------|
-| `GET` | `/api/tickets` | Listar todos los tickets | ✅ |
-| `GET` | `/api/tickets/:id` | Obtener ticket por ID | ✅ |
-| `POST` | `/api/tickets` | Crear nuevo ticket | ✅ |
-| `PUT` | `/api/tickets/:id` | Actualizar ticket | ✅ Admin |
-| `DELETE` | `/api/tickets/:id` | Eliminar ticket | ✅ Admin |
-
-### Usuarios
-
-| Método | Ruta | Descripción | Auth |
-|--------|------|-------------|------|
-| `GET` | `/api/users` | Listar usuarios | ✅ Admin |
-| `GET` | `/api/users/:id` | Obtener usuario por ID | ✅ Admin |
+> **Nota:** Si tu base de datos PostgreSQL está en la nube y requiere SSL, descomenta las opciones `dialectOptions` en `config/postgresql.js`.
 
 ---
 
-## 🔒 Autenticación
-
-Las rutas protegidas requieren un token JWT en el header:
-
-```http
-Authorization: Bearer <token>
-```
-
-El token se obtiene al hacer login en `/api/auth/login`.
-
----
-
-## 👥 Roles
-
-| Rol | Permisos |
-|-----|----------|
-| `user` | Consultar y crear tickets propios |
-| `admin` | Acceso completo a todos los recursos |
-
----
-
-## 📁 Estructura del proyecto
+## Estructura del proyecto
 
 ```
 ticketapp/
-├── src/
-│   ├── config/         # Configuración de BD y variables de entorno
-│   ├── controllers/    # Lógica de cada endpoint
-│   ├── middlewares/    # Auth JWT, validaciones, roles
-│   ├── models/         # Modelos y queries a PostgreSQL
-│   ├── routes/         # Definición de rutas
-│   └── index.js        # Entry point
+├── app.js                          # Entry point
+├── config/
+│   ├── postgresql.js               # Conexión Sequelize (PostgreSQL)
+│   └── mongodb.js                  # Conexión Mongoose (MongoDB)
+├── app/
+│   ├── models/
+│   │   └── server.js               # Clase Server (Express + middlewares + rutas)
+│   ├── routes/
+│   │   ├── index.js                # Cargador dinámico de rutas
+│   │   ├── auth.js
+│   │   ├── users.js
+│   │   ├── tickets.js
+│   │   ├── customers.js
+│   │   ├── campus.js
+│   │   ├── roles.js
+│   │   ├── permissions.js
+│   │   ├── contacts.js
+│   │   ├── typeUser.js
+│   │   ├── bitacora.js
+│   │   ├── preforms.js
+│   │   ├── survey.js
+│   │   └── ticketComment.js
+│   ├── components/                 # Lógica por entidad (controller / service / repositorie / model)
+│   │   ├── auth/
+│   │   ├── users/
+│   │   ├── tickets/
+│   │   ├── customers/
+│   │   ├── campus/
+│   │   ├── roles/
+│   │   ├── permissions/
+│   │   ├── contacts/
+│   │   ├── typeUser/
+│   │   ├── bitacora/
+│   │   ├── preforms/
+│   │   ├── survey/
+│   │   ├── ticketComment/
+│   │   └── uploads/
+│   ├── middleware/
+│   │   ├── validateJWT.js          # Verificación de token JWT desde cookie
+│   │   └── validateCampos.js       # Validación de campos con express-validator
+│   └── helpers/
+│       ├── response.js             # Formato estándar de respuestas
+│       ├── generateJWT.js          # Generación de tokens JWT
+│       ├── sendEmail.js            # Envío de correos via SMTP
+│       ├── uploadFile.js           # Configuración de Multer
+│       ├── validatorsDB.js         # Validaciones personalizadas contra la BD
+│       └── helpers.js              # Utilidades generales
+├── public/                         # Archivos estáticos
 ├── .env.example
 ├── package.json
 └── README.md
@@ -136,38 +147,401 @@ ticketapp/
 
 ---
 
-## 🧪 Ejemplo de uso
+## Autenticación
 
-**Login:**
-```bash
-curl -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email": "user@example.com", "password": "123456"}'
-```
+El sistema usa **JWT almacenado en una cookie HTTP-only**. Al hacer login, el servidor establece automáticamente la cookie `access_token` en el navegador/cliente.
 
-**Respuesta:**
+- **Expiración del token:** 4 horas
+- **Cookie:** `access_token` (httpOnly, SameSite: Strict, Secure en producción)
+- **Rate limit:** 100 solicitudes por IP cada 15 minutos
+
+No es necesario enviar un header `Authorization`. La cookie se envía automáticamente con cada solicitud si el cliente la soporta (navegadores, curl con `-c`/`-b`, Postman con cookies habilitadas).
+
+---
+
+## Formato de respuesta
+
+Todas las respuestas siguen esta estructura:
+
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": 1,
-    "email": "user@example.com",
-    "role": "user"
-  }
+  "error": false,
+  "status": 200,
+  "body": { }
 }
 ```
 
-**Crear ticket:**
-```bash
-curl -X POST http://localhost:3000/api/tickets \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{"event": "Concierto Rock", "quantity": 2, "price": 50000}'
+En caso de error:
+
+```json
+{
+  "error": true,
+  "status": 400,
+  "body": "Mensaje de error"
+}
 ```
 
 ---
 
-## 👤 Autor
+## Endpoints
+
+> **✅ JWT** = requiere cookie `access_token` válida
+> **❌** = ruta pública
+
+---
+
+### Autenticación — `/api/auth`
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| `POST` | `/api/auth/login` | Iniciar sesión. Establece la cookie `access_token` | ❌ |
+| `POST` | `/api/auth/renew` | Renovar el token JWT | ✅ JWT |
+| `POST` | `/api/auth/sendtoken` | Enviar token de recuperación de contraseña al correo | ❌ |
+| `POST` | `/api/auth/comparetoken` | Validar token de recuperación de contraseña | ❌ |
+
+**Body login:**
+```json
+{
+  "username": "admin",
+  "password": "123456"
+}
+```
+
+**Body sendtoken:**
+```json
+{
+  "username": "admin"
+}
+```
+
+**Body comparetoken:**
+```json
+{
+  "token": "ABC123",
+  "username": "admin"
+}
+```
+
+---
+
+### Usuarios — `/api/users`
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/users` | Listar todos los usuarios | ✅ JWT |
+| `GET` | `/api/users/:id` | Obtener usuario por ID | ✅ JWT |
+| `GET` | `/api/users/username/:username` | Obtener usuario por nombre de usuario | ✅ JWT |
+| `POST` | `/api/users` | Crear nuevo usuario (soporta subida de foto) | ✅ JWT |
+| `PATCH` | `/api/users/:id` | Actualizar usuario por ID | ✅ JWT |
+| `DELETE` | `/api/users/:id` | Inactivar usuario (state_id = 2) | ✅ JWT |
+| `POST` | `/api/users/changepass` | Cambiar contraseña de usuario | ❌ |
+
+**Body POST /api/users** (`multipart/form-data`):
+```
+username    string  requerido
+name        string  requerido
+email       string  requerido
+password    string  requerido
+rol_id      number  requerido
+state_id    number  requerido
+department_id number requerido
+campus_id   number  requerido
+file        file    opcional (imagen de perfil)
+```
+
+**Body POST /api/users/changepass:**
+```json
+{
+  "username": "admin",
+  "newpass": "nuevaContrasena123"
+}
+```
+
+---
+
+### Tickets — `/api/tickets`
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/tickets` | Listar todos los tickets | ✅ JWT |
+| `GET` | `/api/tickets/abiertos` | Listar tickets abiertos (sin fecha de cierre) | ✅ JWT |
+| `GET` | `/api/tickets/cerrados` | Listar tickets cerrados (con fecha de cierre) | ✅ JWT |
+| `GET` | `/api/tickets/enespera` | Listar tickets en espera (`on_hold = true`) | ✅ JWT |
+| `GET` | `/api/tickets/user/:id_user` | Listar tickets de un usuario específico | ✅ JWT |
+| `GET` | `/api/tickets/:id` | Obtener ticket por ID | ✅ JWT |
+| `POST` | `/api/tickets` | Crear nuevo ticket (hasta 6 archivos adjuntos) | ✅ JWT |
+| `PATCH` | `/api/tickets/:id` | Actualizar ticket por ID | ✅ JWT |
+| `POST` | `/api/tickets/close/:id` | Cerrar ticket con razón y responsable | ✅ JWT |
+
+**Body POST /api/tickets** (`multipart/form-data`):
+```
+user_id        number  requerido
+priority_id    number  requerido
+application_id number  requerido
+browser_id     number  requerido
+sisope_id      number  requerido
+subject        string  requerido
+description    string  requerido
+email          string  requerido
+file           file    opcional (hasta 6 archivos: jpeg, png, pdf, xls, xlsx, csv, doc, txt)
+```
+
+**Body POST /api/tickets/close/:id:**
+```json
+{
+  "reason_id": 1,
+  "user_id_resp": 5
+}
+```
+
+---
+
+### Comentarios de tickets — `/api/ticketComment`
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/ticketComment/:ticket_id` | Listar comentarios de un ticket | ✅ JWT |
+| `GET` | `/api/ticketComment/:id` | Obtener comentario por ID | ✅ JWT |
+| `POST` | `/api/ticketComment` | Crear comentario (hasta 6 archivos adjuntos) | ✅ JWT |
+| `PATCH` | `/api/ticketComment/:id` | Actualizar comentario | ✅ JWT |
+| `DELETE` | `/api/ticketComment/:id` | Eliminar comentario | ✅ JWT |
+
+---
+
+### Clientes — `/api/customers`
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/customers` | Listar todos los clientes | ✅ JWT |
+| `GET` | `/api/customers/:id` | Obtener cliente por ID | ✅ JWT |
+| `GET` | `/api/customers/name/:name` | Obtener cliente por nombre | ✅ JWT |
+| `POST` | `/api/customers` | Crear nuevo cliente | ✅ JWT |
+| `PATCH` | `/api/customers/:id` | Actualizar cliente | ✅ JWT |
+| `DELETE` | `/api/customers/:id` | Inactivar cliente | ✅ JWT |
+
+**Body POST /api/customers:**
+```json
+{
+  "name": "Nombre del cliente"
+}
+```
+
+---
+
+### Sedes — `/api/campus`
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/campus` | Listar todas las sedes | ✅ JWT |
+| `GET` | `/api/campus/:id` | Obtener sede por ID | ✅ JWT |
+| `GET` | `/api/campus/name/:name` | Obtener sede por nombre | ✅ JWT |
+| `GET` | `/api/campus/client/:client_id` | Listar sedes de un cliente | ✅ JWT |
+| `POST` | `/api/campus` | Crear nueva sede | ✅ JWT |
+| `PATCH` | `/api/campus/:id` | Actualizar sede | ✅ JWT |
+| `DELETE` | `/api/campus/:id` | Inactivar sede | ✅ JWT |
+
+**Body POST /api/campus:**
+```json
+{
+  "name": "Sede Norte",
+  "client_id": 1
+}
+```
+
+---
+
+### Roles — `/api/roles`
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/roles` | Listar todos los roles | ✅ JWT |
+| `GET` | `/api/roles/:id` | Obtener rol por ID | ✅ JWT |
+| `GET` | `/api/roles/permission/:id` | Listar permisos asignados a un rol | ✅ JWT |
+| `POST` | `/api/roles` | Crear nuevo rol | ✅ JWT |
+| `PATCH` | `/api/roles/:id` | Actualizar rol | ✅ JWT |
+| `DELETE` | `/api/roles/:id` | Inactivar rol | ✅ JWT |
+
+**Body POST /api/roles:**
+```json
+{
+  "name": "Soporte"
+}
+```
+
+---
+
+### Permisos — `/api/permissions`
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/permissions` | Listar todos los permisos | ✅ JWT |
+| `GET` | `/api/permissions/:id` | Obtener permiso por ID | ✅ JWT |
+| `POST` | `/api/permissions` | Crear nuevo permiso | ✅ JWT |
+| `PATCH` | `/api/permissions/:id` | Actualizar permiso | ✅ JWT |
+| `DELETE` | `/api/permissions/:id` | Inactivar permiso | ✅ JWT |
+
+---
+
+### Contactos — `/api/contacts`
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/contacts` | Listar todos los contactos | ✅ JWT |
+| `GET` | `/api/contacts/:id` | Obtener contacto por ID | ✅ JWT |
+| `POST` | `/api/contacts` | Crear nuevo contacto | ✅ JWT |
+| `PATCH` | `/api/contacts/:id` | Actualizar contacto | ✅ JWT |
+| `DELETE` | `/api/contacts/:id` | Inactivar contacto | ✅ JWT |
+
+**Body POST /api/contacts:**
+```json
+{
+  "name": "Juan Pérez",
+  "phone": "3001234567",
+  "email": "juan@empresa.com",
+  "clientId": 1,
+  "campusId": 2,
+  "typeUserId": 1
+}
+```
+
+---
+
+### Tipos de usuario — `/api/typeUser`
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/typeUser` | Listar todos los tipos de usuario | ✅ JWT |
+| `GET` | `/api/typeUser/:id` | Obtener tipo de usuario por ID | ✅ JWT |
+| `POST` | `/api/typeUser` | Crear tipo de usuario | ✅ JWT |
+| `PATCH` | `/api/typeUser/:id` | Actualizar tipo de usuario | ✅ JWT |
+| `DELETE` | `/api/typeUser/:id` | Inactivar tipo de usuario | ✅ JWT |
+
+---
+
+### Preformas — `/api/preforms`
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/preforms` | Listar todas las preformas | ✅ JWT |
+| `GET` | `/api/preforms/suceso/:suceso` | Listar preformas por suceso | ✅ JWT |
+| `GET` | `/api/preforms/:id` | Obtener preforma por ID | ✅ JWT |
+| `POST` | `/api/preforms` | Crear nueva preforma | ✅ JWT |
+| `PATCH` | `/api/preforms/:id` | Actualizar preforma | ✅ JWT |
+| `DELETE` | `/api/preforms/:id` | Inactivar preforma | ✅ JWT |
+
+**Body POST /api/preforms:**
+```json
+{
+  "title": "Título de la preforma",
+  "description": "Descripción detallada",
+  "suceso_id": 1
+}
+```
+
+---
+
+### Encuestas — `/api/survey`
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/survey` | Listar todas las encuestas | ✅ JWT |
+| `GET` | `/api/survey/:id` | Obtener encuesta por ID | ✅ JWT |
+| `GET` | `/api/survey/client/:client_id` | Listar encuestas de un cliente | ✅ JWT |
+| `POST` | `/api/survey` | Crear nueva encuesta | ✅ JWT |
+| `PATCH` | `/api/survey/:id` | Actualizar encuesta | ✅ JWT |
+| `DELETE` | `/api/survey/:id` | Inactivar encuesta | ✅ JWT |
+
+---
+
+### Bitácora — `/api/bitacora`
+
+| Método | Ruta | Descripción | Auth |
+|--------|------|-------------|------|
+| `GET` | `/api/bitacora/:id` | Obtener registro de auditoría por ID | ✅ JWT |
+| `POST` | `/api/bitacora` | Crear registro de auditoría | ✅ JWT |
+
+---
+
+## Ejemplos de uso
+
+### Login
+
+```bash
+curl -X POST http://localhost:8000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -c cookies.txt \
+  -d '{"username": "admin", "password": "123456"}'
+```
+
+**Respuesta exitosa:**
+```json
+{
+  "error": false,
+  "status": 200,
+  "body": {
+    "name": "Administrador",
+    "username": "admin",
+    "email": "admin@empresa.com"
+  }
+}
+```
+
+### Listar tickets (con cookie guardada)
+
+```bash
+curl http://localhost:8000/api/tickets \
+  -b cookies.txt
+```
+
+### Crear ticket con archivo adjunto
+
+```bash
+curl -X POST http://localhost:8000/api/tickets \
+  -b cookies.txt \
+  -F "user_id=1" \
+  -F "priority_id=2" \
+  -F "application_id=1" \
+  -F "browser_id=1" \
+  -F "sisope_id=1" \
+  -F "subject=Error en módulo de pagos" \
+  -F "description=Al intentar procesar el pago aparece un error 500" \
+  -F "email=usuario@empresa.com" \
+  -F "file=@captura.png"
+```
+
+### Cerrar un ticket
+
+```bash
+curl -X POST http://localhost:8000/api/tickets/close/42 \
+  -b cookies.txt \
+  -H "Content-Type: application/json" \
+  -d '{"reason_id": 1, "user_id_resp": 3}'
+```
+
+---
+
+## Scripts disponibles
+
+| Script | Descripción |
+|--------|-------------|
+| `npm run dev` | Inicia el servidor con nodemon (recarga automática) |
+| `npm run lint:fix` | Corrige errores de ESLint en vistas de correo |
+
+---
+
+## Límites y restricciones
+
+| Parámetro | Valor |
+|-----------|-------|
+| Rate limit | 100 solicitudes por IP cada 15 minutos |
+| Tamaño máximo de archivo | 250 KB por archivo |
+| Archivos por ticket/comentario | Hasta 6 archivos |
+| Tipos de archivo permitidos | `jpeg`, `jpg`, `png`, `pdf`, `xls`, `xlsx`, `csv`, `doc`, `txt` |
+| Expiración del JWT | 4 horas |
+
+---
+
+## Autor
 
 **Alejandro Benjumea Aguirre**
 - GitHub: [@Alejandro-Benjumea-Aguirre](https://github.com/Alejandro-Benjumea-Aguirre)
@@ -176,6 +550,6 @@ curl -X POST http://localhost:3000/api/tickets \
 
 ---
 
-## 📄 Licencia
+## Licencia
 
 MIT License — libre para usar y modificar.

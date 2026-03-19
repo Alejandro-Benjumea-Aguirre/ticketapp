@@ -24,15 +24,15 @@ const router = Router()
 
 router.get('/', validateJWT, getTickets)
 
-router.get('/:id', validateJWT, getTicket)
-
-router.get('/:id_user', validateJWT, getTicketByUser)
-
 router.get('/abiertos', validateJWT, getTicketByAbiertos)
 
 router.get('/cerrados', validateJWT, getTicketByCerrados)
 
 router.get('/enespera', validateJWT, getTicketByEspera)
+
+router.get('/user/:id_user', validateJWT, getTicketByUser)
+
+router.get('/:id', validateJWT, getTicket)
 
 router.post('/', [
   validateJWT,

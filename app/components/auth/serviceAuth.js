@@ -101,7 +101,7 @@ const sendToken = async (username) => {
 
 const compareToken = async (token, userId, time) => {
   try {
-    const resp = repositorieUser.compareToken(token, userId, time)
+    const resp = await repositorieUser.compareToken(token, userId, time)
 
     if (!resp) {
       throw new Error('No coincide el token o el tiempo ya expiro')

@@ -8,9 +8,9 @@ const router = Router()
 
 router.get('/', validateJWT, controllerSurvey.getSuveys)
 
-router.get('/:id', validateJWT, controllerSurvey.getSurvey)
+router.get('/client/:client_id', validateJWT, controllerSurvey.getSurveysxClient)
 
-router.get('/:client_id', validateJWT, controllerSurvey.getSurveysxClient)
+router.get('/:id', validateJWT, controllerSurvey.getSurvey)
 
 router.post('/', validateJWT, controllerSurvey.postSurvey)
 

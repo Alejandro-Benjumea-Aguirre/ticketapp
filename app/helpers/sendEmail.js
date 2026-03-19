@@ -1,30 +1,20 @@
 const nodemailer = require('nodemailer')
 
 const transporter = nodemailer.createTransport({
-  host: '10.200.11.11',
-  port: 25,
-  secure: false,
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: process.env.SMTP_SECURE === 'true',
   auth: {
-    user: 'ticket@pana.com.co',
-    pass: 'ticket123'
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
   }
 })
-
-// 10.200.11.11 host
-// 25 port
-// N Secure
-// ticket@pana.com.co correo desde donde se hace la peticion
-// ticket123 contraseña
-// ticket@pana.com.co
-// Pana Bussines SAS
-// ;
-// 0
 
 // async..await is not allowed in global scope, must use a wrapper
 const sendEmail = async (to, subject, text, html) => {
   // send mail with defined transport object
   const info = await transporter.sendMail({
-    from: 'Pana Bussines SAS <ticket@pana.com.co>', // sender address
+    from: `Pana Bussines SAS <${process.env.SMTP_USER}>`, // sender address
     to, // list of receivers
     subject, // Subject line
     text, // plain text body

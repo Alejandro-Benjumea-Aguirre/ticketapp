@@ -15,7 +15,7 @@ const upload = multer(
   { storage, 
     limits: {fileSize: 250000},
     fileFilter: function(req, file, cb) {
-      const extenciones = [jpeg, png, xls, xlsx, csv, pdf, doc, txt, text, plain, jpg]
+      const extenciones = ['jpeg', 'png', 'xls', 'xlsx', 'csv', 'pdf', 'doc', 'txt', 'text', 'plain', 'jpg']
 
       let fileMime = file.mimetype.split('/')
 

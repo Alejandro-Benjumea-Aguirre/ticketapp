@@ -60,7 +60,7 @@ const createRol = async (body) => {
 
   const rol = {
     name,
-    estado: rol.estado
+    state_id: 1
   }
 
   const resp = await repositorieRol.created(rol)

@@ -8,11 +8,11 @@ const router = Router()
 
 router.get('/', validateJWT, controllerCampus.getCampus)
 
+router.get('/name/:name', validateJWT, controllerCampus.getCampusByName)
+
+router.get('/client/:client_id', validateJWT, controllerCampus.getCampusByClient)
+
 router.get('/:id', validateJWT, controllerCampus.getCampu)
-
-router.get('/:name', validateJWT, controllerCampus.getCampusByName)
-
-router.get('/:cient_id', validateJWT, controllerCampus.getCampusByClient)
 
 router.post('/', validateJWT, controllerCampus.postCampus)
 

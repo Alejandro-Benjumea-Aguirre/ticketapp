@@ -4,8 +4,7 @@ const cookieParser = require('cookie-parser');
 const compression = require('compression');
 const { rateLimit } = require('express-rate-limit');
 
-const connectMongoDB = require('../../config/mongodb');
-const db = require('../../config/postgresql');
+const { connect } = require('../../config/database');
 
 class Server {
   #app
@@ -37,20 +36,11 @@ class Server {
 
   async dbConecction () {
     try {
-      await db.authenticate()
-      console.log('Database Online')
+      await connect()
     } catch (error) {
-      console.error('Error al conectar con la base de datos sql:', error);
-      process.exit(1); // Finalizar proceso si la base de datos no está disponible
+      console.error('Error al conectar con la base de datos:', error);
+      process.exit(1);
     }
-
-    try {
-      await connectMongoDB();  
-    } catch (error) {
-      console.error('Error al conectar con la base de datos no sql:', error);
-      process.exit(1); // Finalizar proceso si la base de datos no está disponible
-    }
-    
   }
 
   middlewares () {

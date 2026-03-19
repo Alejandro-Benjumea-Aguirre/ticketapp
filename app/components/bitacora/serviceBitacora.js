@@ -29,7 +29,7 @@ const createBitacora = async (body) => {
     username
   }
 
-  const resp = await repositorieRol.created(bitacora)
+  const resp = await repositorieBitacora.created(bitacora)
   return {
     name: resp.getDataValue('id')
   }

@@ -1,4 +1,5 @@
 const repositorieCustomer = require('./repositorieCustomer')
+const serviceBitacora = require('../bitacora/serviceBitacora')
 
 const listAllCustomers = async () => {
   const resp = await repositorieCustomer.listAll()
@@ -47,10 +48,10 @@ const createCustomer = async (body) => {
 
   const customer = {
     name,
-    stated_id: 1
+    state_id: 1
   }
 
-  const customerCreate = await repositorieCustomer.created(contact)
+  const customerCreate = await repositorieCustomer.created(customer)
   const bodyBitacora = {
     eventId: 'por definir', 
     tableAffect: 'customers', 

@@ -22,11 +22,11 @@ const getRol = async (req, res) => {
 
 const getRolPermissions = async (req, res) => {
   try {
-    const { id } = req. params
+    const { id } = req.params
     const resp = await serviceRol.listRolPermisions(id)
     response.success(req, res, resp, 200)
   } catch (error) {
-    response.error(req, res, e, 500)
+    response.error(req, res, error, 500)
   }
 }
 

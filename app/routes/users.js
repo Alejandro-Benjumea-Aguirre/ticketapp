@@ -14,11 +14,10 @@ const {
 const router = Router()
 
 router.get('/', validateJWT, controllerUsers.getUsers)
-//router.get('/', controllerUsers.getUsers)
+
+router.get('/username/:username', controllerUsers.getUserByUsername)
 
 router.get('/:id', controllerUsers.getUser)
-
-router.get('/:username', controllerUsers.getUserByUsername)
 
 router.post('/', [
   validateJWT,
@@ -36,7 +35,7 @@ router.post('/', [
     check('state_id').custom(),
     check('department_id').custom(),
     check('campus_id').custom(), */
-  //validateCampos,
+  validateCampos,
   upload.single('file')
 ],
 controllerUsers.postUser)

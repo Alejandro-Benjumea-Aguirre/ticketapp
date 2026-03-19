@@ -22,11 +22,11 @@ const getSurvey = async (req, res) => {
 
 const getSurveysxClient = async (req, res) => {
   try {
-    const { client_id } = req. params
+    const { client_id } = req.params
     const resp = await serviceSurvey.listSurveysxClient(client_id)
     response.success(req, res, resp, 200)
   } catch (error) {
-    response.error(req, res, e, 500)
+    response.error(req, res, error, 500)
   }
 }
 
@@ -57,7 +57,7 @@ const deleteSurvey = async (req, res) => {
   const { id } = req.params
 
   try {
-    const resp = await serviceSurvey.inactiveRol(id)
+    const resp = await serviceSurvey.inactiveSurvey(id)
     response.success(req, res, resp, 200)
   } catch (error) {
     response.error(req, res, 'Hable con el administrador', 500)

@@ -185,7 +185,7 @@ const createTicket = async (body, files) => {
   const resp = await repositorieTickets.created(ticket)
 
   if(Array.isArray(files)){
-    files.map(async (file) => {
+    await Promise.all(files.map(async (file) => {
       const { originalname, filename, path, size } = file
       const id = resp.getDataValue('id')
 
@@ -197,9 +197,8 @@ const createTicket = async (body, files) => {
         path: path
       }
 
-      const upload = await repositorieUpload.created(body)
-
-    })
+      await repositorieUpload.created(body)
+    }))
   }
   
   return {

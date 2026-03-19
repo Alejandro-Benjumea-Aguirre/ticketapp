@@ -8,7 +8,7 @@ const router = Router()
 
 router.get('/', validateJWT, controllerPreform.getPreforms)
 
-router.get('/', validateJWT, controllerPreform.getPreformsxSucesos)
+router.get('/suceso/:suceso', validateJWT, controllerPreform.getPreformsxSucesos)
 
 router.get('/:id', validateJWT, controllerPreform.getPreform)
 

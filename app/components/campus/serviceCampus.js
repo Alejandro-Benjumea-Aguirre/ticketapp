@@ -26,12 +26,12 @@ const listCampus = async (id) => {
   const campus = await repositorieCampus.listById(id)
   if (campus) {
     return {
-      name: item.name,
-      url: item.url_alternative,
-      cliente: item.cliente,
-      estado: item.estado,
-      fecha_cre: item.created_date,
-      fecha_up: item.updated_date
+      name: campus.name,
+      url: campus.url_alternative,
+      cliente: campus.cliente,
+      estado: campus.estado,
+      fecha_cre: campus.created_date,
+      fecha_up: campus.updated_date
     }
   } else {
     return `No existe ninguna sede con el id ${id}`
@@ -39,16 +39,16 @@ const listCampus = async (id) => {
 }
 
 const listCampusByName = async (name) => {
-  const resp = await repositorieCampus.listCampusByName(client_id)
+  const resp = await repositorieCampus.listCampusByName(name)
 
   if(resp){
     return {
-      name: item.name,
-      url: item.url_alternative,
-      cliente: item.cliente,
-      estado: item.estado,
-      fecha_cre: item.created_date,
-      fecha_up: item.updated_date
+      name: resp.name,
+      url: resp.url_alternative,
+      cliente: resp.cliente,
+      estado: resp.estado,
+      fecha_cre: resp.created_date,
+      fecha_up: resp.updated_date
     }
   }else {
     return `No hay sedes creadas con el nombre ${name}.`

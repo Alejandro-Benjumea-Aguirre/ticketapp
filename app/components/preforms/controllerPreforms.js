@@ -16,7 +16,7 @@ const getPreformsxSucesos = async (req, res) => {
     const resp = await servicePreform.listAllPreformsxSucesos(suceso)
     response.success(req, res, resp, 200)
   } catch (error) {
-    response.error(req, res, e, 500)
+    response.error(req, res, error, 500)
   }
 }
 
