@@ -4,7 +4,7 @@ const db = require('../../../config/postgresql')
 
 const listAll = async () => {
   const [result] = await db.query(`SELECT tu.name, st.name, tu.created_date, tu.updated_date
-                                    FROM type_user tu 
+                                    FROM type_users tu 
                                     LEFT JOIN states st ON tu.state_id = st.id`)
 
   return result
@@ -12,7 +12,7 @@ const listAll = async () => {
 
 const listById = async (id) => {
   const [result] = await db.query(`SELECT tu.name, st.name, tu.created_date, tu.updated_date
-                                    FROM type_user tu 
+                                    FROM type_users tu 
                                     LEFT JOIN states st ON tu.state_id = st.id
                                    WHERE tu.id = :id`,
                                    { replacements: { id } })

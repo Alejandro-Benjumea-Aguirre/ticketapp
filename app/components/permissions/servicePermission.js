@@ -6,8 +6,8 @@ const listAllPermissions = async () => {
   resp.forEach(permission => {
     permissions.push({
       name: permission.name,
-      telefono: permission.description,
-      email: permission.estado,
+      description: permission.description,
+      estado: permission.estado,
       created_date: permission.created_date,
       updated_date: permission.updated_date
     })
@@ -20,8 +20,8 @@ const listPermission = async (id) => {
   if (permission) {
     return {
       name: permission.name,
-      telefono: permission.description,
-      email: permission.estado,
+      description: permission.description,
+      estado: permission.estado,
       created_date: permission.created_date,
       updated_date: permission.updated_date
     }
@@ -54,9 +54,9 @@ const updatePermission = async (id, body) => {
 
   const permisoUpdate = await repositoriePermission.update(id, body)
 
-  if (permisoUpdate > 0) {
+  if (permisoUpdate[0] > 0) {
     return {
-      name: permisoUpdate.name
+      name: permisoUpdate[1][0].name
     }
   } else {
     return `No se pudo modificar el permiso con el id: ${id}`
@@ -72,9 +72,9 @@ const inactivePermission = async (id) => {
 
   const permisoInactive = await repositoriePermission.remove(id)
 
-  if (permisoInactive > 0) {
+  if (permisoInactive[0] > 0) {
     return {
-      name: permisoInactive.name
+      name: permisoInactive[1][0].name
     }
   } else {
     return `No se pudo inactivar el permiso con el id: ${id}`

@@ -3,9 +3,9 @@ const modelSurvey = require('./modelSurvey')
 const db = require('../../../config/postgresql')
 
 const listAll = async () => {
-  const [result] = await db.query(`SELECT su.ticket_id AS ticket, usr.username AS username, date_send, date_reply, 
-                                  st.name AS estado, num_noti, created_at, updated_at
-                                  FROM survey su 
+  const [result] = await db.query(`SELECT su.ticket_id AS ticket, usr.username AS username, date_send, date_reply,
+                                  st.name AS estado, num_noti, su.created_date, su.updated_date
+                                  FROM survey su
                                   INNER JOIN tickets ti ON su.ticket_id = ti.id
                                   INNER JOIN users usr ON su.user_id = usr.id
                                   INNER JOIN states st ON su.state_id = st.id
@@ -13,30 +13,32 @@ const listAll = async () => {
 
   return result
 }
-  
+
 const listById = async (id) => {
-  const [result] = await db.query(`SELECT su.ticket_id AS ticket, usr.username AS usuario, date_send, date_reply, 
-                                  st.name AS estado, num_noti, created_at, updated_at
-                                  FROM survey su 
+  const [result] = await db.query(`SELECT su.ticket_id AS ticket, usr.username AS usuario, date_send, date_reply,
+                                  st.name AS estado, num_noti, su.created_date, su.updated_date
+                                  FROM survey su
                                   INNER JOIN tickets ti ON su.ticket_id = ti.id
                                   INNER JOIN users usr ON su.user_id = usr.id
                                   INNER JOIN states st ON su.state_id = st.id
-                                  WHERE su.id = ${id}`)
+                                  WHERE su.id = :id`,
+                                  { replacements: { id } })
 
   return result[0]
 }
-  
+
 const listByClient = async (client_id) => {
-  const [result] = await db.query(`SELECT su.ticket_id AS ticket, usr.username AS usuario, date_send, date_reply, 
-                                  st.name AS estado, num_noti, created_at, updated_at, cl.name AS cliente
-                                  FROM survey su 
+  const [result] = await db.query(`SELECT su.ticket_id AS ticket, usr.username AS usuario, date_send, date_reply,
+                                  st.name AS estado, num_noti, su.created_date, su.updated_date, cl.name AS cliente
+                                  FROM survey su
                                   INNER JOIN tickets ti ON su.ticket_id = ti.id
                                   INNER JOIN users usr ON su.user_id = usr.id
                                   INNER JOIN states st ON su.state_id = st.id
-                                  INNER JOIN customers cl ON usr.client_id = cl.id
-                                  WHERE usr.client_id like '${client_id}'`)
+                                  INNER JOIN customers cl ON usr.campus_id = cl.id
+                                  WHERE usr.campus_id = :client_id`,
+                                  { replacements: { client_id } })
 
-  return result[0]
+  return result
 }
 
 const created = async (body) => {

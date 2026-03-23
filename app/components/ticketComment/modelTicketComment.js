@@ -1,7 +1,7 @@
 const { DataTypes, Sequelize } = require('sequelize')
 const db = require('../../../config/postgresql')
   
-const Survey = db.define('survey', {
+const TicketComment = db.define('ticket_comments', {
 
 	id: {
 		allowNull: false,
@@ -64,5 +64,5 @@ const Survey = db.define('survey', {
 
 })
 
-module.exports = Survey
+module.exports = TicketComment
   

@@ -28,7 +28,7 @@ const login = async (req, res) => {
 }
 
 const newToken = async (req, res) => {
-  const id = req.body
+  const { id } = req.body
 
   if (!id) {
     return response.error(req, res, 'El id del usuario es obligatorio.', 400);

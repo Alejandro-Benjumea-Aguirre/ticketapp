@@ -16,7 +16,7 @@ const listAllUsers = async () => {
       departamento: user.department,
       campus: user.campus,
       fecha_cracion: user.created_date,
-      fecha_actualizacion: user.update_date
+      fecha_actualizacion: user.updated_date
     })
   })
   return users
@@ -29,12 +29,12 @@ const listUser = async (id) => {
       username: user.username,
       name: user.name,
       email: user.email,
-      estado: user.estado,
+      estado: user.status,
       rol: user.rol,
       departamento: user.department,
       campus: user.campus,
       fecha_cracion: user.created_date,
-      fecha_actualizacion: user.update_date
+      fecha_actualizacion: user.updated_date
     }
   } else {
     return `No existe ningun usuario con el id ${id}`
@@ -48,12 +48,12 @@ const listUserByUsername = async (username) => {
       username: user.username,
       name: user.name,
       email: user.email,
-      estado: user.estado,
+      estado: user.status,
       rol: user.rol,
       departamento: user.department,
       campus: user.campus,
       fecha_cracion: user.created_date,
-      fecha_actualizacion: user.update_date
+      fecha_actualizacion: user.updated_date
     }
   } else {
     return `No existe ningun usuario con el username ${username}`
@@ -68,11 +68,11 @@ const createUser = async (body) => {
 
   const resp = await repositorieUser.created(body)
   const bodyBitacora = {
-    eventId: 'por definir', 
-    tableAffect: 'users', 
-    fieldAffect: '', 
-    dataPrev: '', 
-    dataNew: 'Creacion', 
+    eventId: 'por definir',
+    tableAffect: 'users',
+    fieldAffect: '',
+    dataPrev: '',
+    dataNew: 'Creacion',
     username: ''
   }
   if(resp){
@@ -85,7 +85,7 @@ const createUser = async (body) => {
   }else{
     return 'No se pudo crear el usuario intentalo de nuevo.'
   }
-  
+
 }
 
 const updateUser = async (id, password, body) => {
@@ -102,20 +102,20 @@ const updateUser = async (id, password, body) => {
 
   const userUpdate = await repositorieUser.update(id, body)
   const bodyBitacora = {
-    eventId: 'por definir', 
-    tableAffect: 'users', 
+    eventId: 'por definir',
+    tableAffect: 'users',
     fieldAffect: `${body}`,
-    dataPrev: `${user}`, 
-    dataNew: `${userUpdate}`, 
+    dataPrev: `${user}`,
+    dataNew: `${userUpdate}`,
     username: ''
   }
   const bitacora = await serviceBitacora.createBitacora(bodyBitacora)
 
-  if (userUpdate > 0) {
+  if (userUpdate[0] > 0) {
     return {
-      name: userUpdate.name,
-      username: userUpdate.username,
-      email: userUpdate.email
+      name: userUpdate[1][0].getDataValue('name'),
+      username: userUpdate[1][0].getDataValue('username'),
+      email: userUpdate[1][0].getDataValue('email')
     }
   } else {
     return `No se pudo modificar el usuario con el id: ${id}`
@@ -131,20 +131,20 @@ const inactiveUser = async (id) => {
 
   const userInactive = await repositorieUser.remove(id)
   const bodyBitacora = {
-    eventId: 'por definir', 
-    tableAffect: 'users', 
+    eventId: 'por definir',
+    tableAffect: 'users',
     fieldAffect: 'state_id',
-    dataPrev: '1', 
-    dataNew: '2', 
+    dataPrev: '1',
+    dataNew: '2',
     username: ''
   }
   const bitacora = await serviceBitacora.createBitacora(bodyBitacora);
 
-  if (userInactive > 0) {
+  if (userInactive[0] > 0) {
     return {
-      name: userInactive.name,
-      username: userInactive.username,
-      email: userInactive.email
+      name: userInactive[1][0].getDataValue('name'),
+      username: userInactive[1][0].getDataValue('username'),
+      email: userInactive[1][0].getDataValue('email')
     }
   } else {
     return `No se pudo inactivar el usuario con el id: ${id}`
@@ -162,19 +162,19 @@ const changePass = async (newpass, username) => {
   const password = bcrypt.hashSync(newpass, salt)
   const userUpdate = await repositorieUser.update(user.uid, { password })
 
-  if (userUpdate > 0) {
+  if (userUpdate[0] > 0) {
     return 'Se realizo la actualizacion de la contraseña correctamente.'
   } else {
     return 'No se pudo actualizar la contraseña intentalo de nuevo'
   }
 }
 
-module.exports = { 
-  listAllUsers, 
-  listUser, 
-  listUserByUsername, 
-  createUser, 
-  updateUser, 
-  inactiveUser, 
-  changePass 
+module.exports = {
+  listAllUsers,
+  listUser,
+  listUserByUsername,
+  createUser,
+  updateUser,
+  inactiveUser,
+  changePass
 }

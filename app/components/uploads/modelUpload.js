@@ -11,7 +11,7 @@ const Upload = db.define('uploads', {
   },
   idTicket: {
     allowNull: false,
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     field: 'id_ticket',
     references: {
         model: 'tickets',
@@ -24,7 +24,7 @@ const Upload = db.define('uploads', {
     type: DataTypes.INTEGER,
     field: 'id_coment',
     references: {
-      model: 'coments',
+      model: 'ticket_comments',
       key: 'id'
     },
     onUpdate: 'CASCADE',

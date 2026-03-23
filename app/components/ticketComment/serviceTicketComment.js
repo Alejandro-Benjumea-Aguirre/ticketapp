@@ -1,4 +1,5 @@
 const repositorieTicketComment = require('./repositorieTicketComment')
+const repositorieUpload = require('../uploads/repositorieUpload')
 
 const listAllComments = async (ticket_id) => {
   const resp = await repositorieTicketComment.listAll(ticket_id)

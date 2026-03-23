@@ -3,47 +3,50 @@ const modelCampus = require('./modelCampus')
 const db = require('../../../config/postgresql')
 
 const listAll = async () => {
-  const [result] = await db.query(`SELECT cam.id, cam.name, cam.url_alternative, cu.name AS cliente, st.name AS estado, 
+  const [result] = await db.query(`SELECT cam.id, cam.name, cam.url_alternative, cu.name AS cliente, st.name AS estado,
                                   cam.created_date, cam.updated_date
-                                  FROM headquarters cam 
+                                  FROM headquarters cam
                                   LEFT JOIN customers cu ON cam.client_id = cu.id
-                                  LEFT JOIN states st ON rol.state_id = st.id 
+                                  LEFT JOIN states st ON cam.state_id = st.id
                                   `)
 
   return result
 }
 
 const listById = async (id) => {
-  const [result] = await db.query(`SELECT cam.id, cam.name, cam.url_alternative, cu.name AS cliente, st.name AS estado, 
+  const [result] = await db.query(`SELECT cam.id, cam.name, cam.url_alternative, cu.name AS cliente, st.name AS estado,
 																	cam.created_date, cam.updated_date
-																	FROM headquarters cam 
+																	FROM headquarters cam
 																	LEFT JOIN customers cu ON cam.client_id = cu.id
-																	LEFT JOIN states st ON rol.state_id = st.id 
-                                  WHERE cam.id = ${id}`)
+																	LEFT JOIN states st ON cam.state_id = st.id
+                                  WHERE cam.id = :id`,
+                                  { replacements: { id } })
 
   return result[0]
 }
 
 const listByName = async (name) => {
-  const [result] = await db.query(`SELECT cam.id, cam.name, cam.url_alternative, cu.name AS cliente, st.name AS estado, 
+  const [result] = await db.query(`SELECT cam.id, cam.name, cam.url_alternative, cu.name AS cliente, st.name AS estado,
 																	cam.created_date, cam.updated_date
-																	FROM headquarters cam 
+																	FROM headquarters cam
 																	LEFT JOIN customers cu ON cam.client_id = cu.id
-																	LEFT JOIN states st ON rol.state_id = st.id 
-                                  WHERE cam.name like '${name}'`)
+																	LEFT JOIN states st ON cam.state_id = st.id
+                                  WHERE cam.name LIKE :name`,
+                                  { replacements: { name } })
 
   return result[0]
 }
 
 const listByClient = async (client_id) => {
-  const [result] = await db.query(`SELECT cam.id, cam.name, cam.url_alternative, cu.name AS cliente, st.name AS estado, 
+  const [result] = await db.query(`SELECT cam.id, cam.name, cam.url_alternative, cu.name AS cliente, st.name AS estado,
 																	cam.created_date, cam.updated_date
-																	FROM headquarters cam 
+																	FROM headquarters cam
 																	LEFT JOIN customers cu ON cam.client_id = cu.id
-																	LEFT JOIN states st ON rol.state_id = st.id 
-                                  WHERE cam.client_id like '${client_id}'`)
+																	LEFT JOIN states st ON cam.state_id = st.id
+                                  WHERE cam.client_id = :client_id`,
+                                  { replacements: { client_id } })
 
-  return result[0]
+  return result
 }
 
 const created = async (body) => {
@@ -64,12 +67,12 @@ const remove = async (id) => {
   return campus
 }
 
-module.exports = { 
-  listAll, 
-  listById, 
-  listByName, 
-  listByClient, 
-  created, 
-  update, 
-  remove 
+module.exports = {
+  listAll,
+  listById,
+  listByName,
+  listByClient,
+  created,
+  update,
+  remove
 }

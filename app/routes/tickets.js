@@ -37,13 +37,13 @@ router.get('/:id', validateJWT, getTicket)
 router.post('/', [
   validateJWT,
   check('user_id', messageValidator(messages.numberRequired, 'user_id')).not().isEmpty().isNumeric(),
-  check('priority_id', messageValidator(messages.numberRequired, 'priority_id')).not().isEmpty().isString(),
-  check('application_id', messageValidator(messages.numberRequired, 'application_id')).not().isEmpty().isString(),
-  check('browser_id', messageValidator(messages.numberRequired, 'browser_id')).not().isEmpty().isString(),
-  check('sisope_id', messageValidator(messages.numberRequired, 'sisope_id')).not().isEmpty().isString(),
+  check('priority_id', messageValidator(messages.numberRequired, 'priority_id')).not().isEmpty().isNumeric(),
+  check('application_id', messageValidator(messages.numberRequired, 'application_id')).not().isEmpty().isNumeric(),
+  check('browser_id', messageValidator(messages.numberRequired, 'browser_id')).not().isEmpty().isNumeric(),
+  check('sisope_id', messageValidator(messages.numberRequired, 'sisope_id')).not().isEmpty().isNumeric(),
   check('subject', messageValidator(messages.stringRequired, 'subject')).not().isEmpty().isString(),
   check('description', messageValidator(messages.stringRequired, 'description')).not().isEmpty().isString(),
-  check('email', messageValidator(messages.email, 'email')).not().isEmpty().isString(),
+  check('email', messageValidator(messages.email, 'email')).not().isEmpty().isEmail(),
   check('user_id').custom(isUserIdValid),
   validateCampos,
   upload.array('file', 6)

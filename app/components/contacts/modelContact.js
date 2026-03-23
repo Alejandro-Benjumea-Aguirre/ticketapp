@@ -18,7 +18,7 @@ const Contact = db.define('contacts', {
     type: DataTypes.INTEGER,
     field: 'client_id',
     references: {
-      model: 'clients',
+      model: 'customers',
       key: 'id'
     },
     onUpdate: 'CASCADE',
@@ -59,7 +59,7 @@ const Contact = db.define('contacts', {
     type: DataTypes.INTEGER,
     field: 'campus_id',
     references: {
-      model: 'customers',
+      model: 'headquarters',
       key: 'id'
     },
     onUpdate: 'CASCADE',

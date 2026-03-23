@@ -5,11 +5,11 @@ const listBitacora = async (id) => {
   if (bitacora) {
     return {
       evento: bitacora.evento,
-      tabla: bitacora.tabla,
-      campo: bitacora.campo,
+      tabla: bitacora.table_affect,
+      campo: bitacora.field_affect,
       data_prev: bitacora.data_prev,
       data_new: bitacora.data_new,
-      usuario: bitacora.username,
+      usuario: bitacora.cod_user,
       fecha_cre: bitacora.created_date
     }
   } else {

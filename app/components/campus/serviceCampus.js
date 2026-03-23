@@ -100,9 +100,9 @@ const updateCampus = async (id, body) => {
 
   const campusUpdate = await repositorieCampus.update(id, body)
 
-  if (campusUpdate > 0) {
+  if (campusUpdate[0] > 0) {
     return {
-      name: campusUpdate.name
+      name: campusUpdate[1][0].name
     }
   } else {
     return `No se pudo modificar la sede con el id: ${id}`
@@ -118,9 +118,9 @@ const inactiveCampus = async (id) => {
 
   const campusRemove = await repositorieCampus.remove(id)
 
-  if (campusRemove > 0) {
+  if (campusRemove[0] > 0) {
     return {
-      name: campusRemove.name
+      name: campusRemove[1][0].name
     }
   } else {
     return `No se pudo inactivar la sede con el id: ${id}`

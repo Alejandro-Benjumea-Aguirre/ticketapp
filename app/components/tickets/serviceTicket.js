@@ -202,12 +202,12 @@ const createTicket = async (body, files) => {
   }
   
   return {
-    ticket: resp.getDataValue('ticket_id')
+    ticket: resp.getDataValue('id')
   }
 }
 
 const updateTicket = async (id, body) => {
-  
+
   const ticket = await repositorieTickets.listById(id)
 
   if (!ticket) {
@@ -216,9 +216,9 @@ const updateTicket = async (id, body) => {
 
   const upsertTicket = await repositorieTickets.update(id, body)
 
-  if(upsertTicket){
+  if(upsertTicket[0] > 0){
     return {
-      ticket: upsertTicket.ticket_id,
+      ticket: id,
     }
   }else{
     return `No se pudo modificar el ticket con el id: ${id}`
@@ -232,7 +232,7 @@ const closeTicket = async (id, body) => {
     return `No existe ningun ticket con el id: ${id}`
   }
 
-  const close_date = Date.now() 
+  const close_date = Date.now()
 
   const {
     reason_id,
@@ -241,9 +241,9 @@ const closeTicket = async (id, body) => {
 
   const upsertTicket = await repositorieTickets.update(id, {close_date, reason_id, user_id_resp})
 
-  if(upsertTicket){
+  if(upsertTicket[0] > 0){
     return {
-      ticket: upsertTicket.ticket_id
+      ticket: id
     }
   }else{
     return `No se pudo cerrar el ticket con el id ${id} intenta de nuevo`

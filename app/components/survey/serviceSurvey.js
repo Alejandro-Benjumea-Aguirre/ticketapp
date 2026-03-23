@@ -9,14 +9,14 @@ const listAllSurveys = async () => {
   const surveys = []
   resp.forEach(survey => {
     surveys.push({
-      ticket: survey.ticket_id,
+      ticket: survey.ticket,
       username: survey.username,
       fecha_envio: survey.date_send,
       fecha_respuesta: survey.date_reply,
       estado: survey.estado,
       nota: survey.num_noti,
-      fecha_cre: survey.created_at,
-      fecha_up: survey.updated_at
+      fecha_cre: survey.created_date,
+      fecha_up: survey.updated_date
     })
   })
   return surveys
@@ -26,14 +26,14 @@ const listSurvey = async (id) => {
   const survey = await repositorieSurvey.listById(id)
   if (survey) {
     return {
-      ticket: survey.ticket_id,
-      username: survey.username,
+      ticket: survey.ticket,
+      username: survey.usuario,
       fecha_envio: survey.date_send,
       fecha_respuesta: survey.date_reply,
       estado: survey.estado,
       nota: survey.num_noti,
-      fecha_cre: survey.created_at,
-      fecha_up: survey.updated_at
+      fecha_cre: survey.created_date,
+      fecha_up: survey.updated_date
     }
   } else {
     return `No existe ninguna encuesta con el id ${id}`
@@ -48,14 +48,14 @@ const listSurveysxClient = async (client_id) => {
   const surveys = []
   resp.forEach(survey => {
     surveys.push({
-      ticket: survey.ticket_id,
-      username: survey.username,
+      ticket: survey.ticket,
+      username: survey.usuario,
       fecha_envio: survey.date_send,
       fecha_respuesta: survey.date_reply,
       estado: survey.estado,
       nota: survey.num_noti,
-      fecha_cre: survey.created_at,
-      fecha_up: survey.updated_at
+      fecha_cre: survey.created_date,
+      fecha_up: survey.updated_date
     })
   })
   return surveys
@@ -86,10 +86,10 @@ const updateSurvey = async (id, body) => {
 
   const surveyUpdate = await repositorieSurvey.update(id, body)
 
-  if (surveyUpdate > 0) {
+  if (surveyUpdate[0] > 0) {
     return {
-      ticket_id: surveyUpdate.ticket_id,
-      user_id: surveyUpdate.user_id
+      ticket_id: surveyUpdate[1][0].getDataValue('ticket_id'),
+      user_id: surveyUpdate[1][0].getDataValue('user_id')
     }
   } else {
     return `No se pudo modificar la encuesta con el id: ${id}`
@@ -97,9 +97,9 @@ const updateSurvey = async (id, body) => {
 }
 
 const inactiveSurvey = async (id) => {
-  const rol = await repositorieSurvey.listById(id)
+  const survey = await repositorieSurvey.listById(id)
 
-  if (!rol) {
+  if (!survey) {
     return `No existe una encuesta con el id: ${id}`
   }
 
@@ -107,18 +107,18 @@ const inactiveSurvey = async (id) => {
 
   if (cantidad > 0) {
     return {
-      name: rol.name
+      ticket_id: survey.ticket
     }
   } else {
     return `No se pudo inactivar la encuesta con el id: ${id}`
   }
 }
 
-module.exports = { 
-	listAllSurveys, 
-	listSurvey, 
-	listSurveysxClient, 
-	createSurvey, 
-	updateSurvey, 
-	inactiveSurvey 
+module.exports = {
+	listAllSurveys,
+	listSurvey,
+	listSurveysxClient,
+	createSurvey,
+	updateSurvey,
+	inactiveSurvey
 }

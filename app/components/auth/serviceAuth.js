@@ -75,8 +75,8 @@ const sendToken = async (username) => {
     }
 
     const to = user.email
-    const subject = 'Recuepracion de contraseña'
-    const text = `Para la recuepracion de su contraseña se ha creado el siguiente token el cual 
+    const subject = 'Recuperación de contraseña'
+    const text = `Para la recuperación de su contraseña se ha creado el siguiente token el cual 
                   debe de ser ingresado en el aplicativo y luego deben de cambiar la contraseña.
                   Token = ${token}`
     const html = htmlToken
