@@ -42,11 +42,26 @@ npm install
 cp .env.example .env
 # Editar .env con tus credenciales (ver sección Variables de entorno)
 
-# 4. Iniciar el servidor en modo desarrollo
+# 4. Crear la base de datos en PostgreSQL
+# Asegúrate de que PostgreSQL esté corriendo y crea la base de datos manualmente:
+# CREATE DATABASE ticketapp;
+
+# 5. Ejecutar las migraciones (crea todas las tablas)
+npx sequelize-cli db:migrate
+
+# 6. Ejecutar los seeders (carga datos iniciales: estados, roles y usuario admin)
+npx sequelize-cli db:seed:all
+
+# 7. Iniciar el servidor en modo desarrollo
 npm run dev
 ```
 
 El servidor arranca por defecto en `http://localhost:8000`.
+
+> **Credenciales iniciales del administrador:**
+> - Usuario: `admin`
+> - Contraseña: `Admin123!`
+> - Email: `admin@ticketapp.com`
 
 ---
 
@@ -520,12 +535,68 @@ curl -X POST http://localhost:8000/api/tickets/close/42 \
 
 ---
 
+## Migraciones y Seeders
+
+El proyecto usa **Sequelize CLI** para gestionar el esquema de la base de datos PostgreSQL.
+
+### Comandos de migraciones
+
+| Comando | Descripción |
+|---------|-------------|
+| `npx sequelize-cli db:migrate` | Aplica todas las migraciones pendientes (crea las tablas) |
+| `npx sequelize-cli db:migrate:undo` | Revierte la última migración |
+| `npx sequelize-cli db:migrate:undo:all` | Revierte todas las migraciones |
+
+### Comandos de seeders
+
+| Comando | Descripción |
+|---------|-------------|
+| `npx sequelize-cli db:seed:all` | Inserta los datos iniciales (estados, roles, usuario admin) |
+| `npx sequelize-cli db:seed:undo:all` | Elimina todos los datos insertados por seeders |
+
+### Tablas creadas por las migraciones
+
+| Migración | Tabla | Descripción |
+|-----------|-------|-------------|
+| `20260322000001` | `states` | Estados del sistema (Activo / Inactivo) |
+| `20260322000002` | `customers` | Clientes / empresas |
+| `20260322000003` | `roles` | Roles de usuario |
+| `20260322000004` | `permissions` | Permisos del sistema |
+| `20260322000005` | `type_users` | Tipos de usuario |
+| `20260322000006` | `headquarters` | Sedes / campus |
+| `20260322000007` | `events` | Eventos (catálogo para tickets) |
+| `20260322000008` | `sucesos` | Sucesos (catálogo para preformas) |
+| `20260322000009` | `users` | Usuarios del sistema |
+| `20260322000010` | `bitacora` | Registros de auditoría |
+| `20260322000011` | `preforms` | Preformas / plantillas |
+| `20260322000012` | `contacts` | Contactos de clientes |
+| `20260322000013` | `tickets` | Tickets de soporte |
+| `20260322000014` | `survey` | Encuestas |
+| `20260322000015` | `ticket_comments` | Comentarios en tickets |
+| `20260322000016` | `uploads` | Archivos adjuntos |
+
+### Datos insertados por el seeder inicial
+
+- **Estados:** `Activo` (id: 1), `Inactivo` (id: 2)
+- **Roles:** `Administrador` (id: 1), `Agente` (id: 2), `Cliente` (id: 3)
+- **Usuario administrador:**
+  - Username: `admin`
+  - Contraseña: `Admin123!`
+  - Email: `admin@ticketapp.com`
+
+---
+
 ## Scripts disponibles
 
 | Script | Descripción |
 |--------|-------------|
 | `npm run dev` | Inicia el servidor con nodemon (recarga automática) |
 | `npm run lint:fix` | Corrige errores de ESLint en vistas de correo |
+| `npm run db:migrate` | Aplica todas las migraciones pendientes |
+| `npm run db:migrate:undo` | Revierte todas las migraciones |
+| `npm run db:seed` | Inserta los datos iniciales (seeders) |
+| `npm run db:seed:undo` | Elimina todos los datos de los seeders |
+| `npm run db:reset` | Revierte, re-migra y re-siembra la base de datos |
 
 ---
 

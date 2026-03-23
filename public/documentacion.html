@@ -29,11 +29,22 @@ openapi: 3.0.3
 info:
   title: TicketApp API
   description: |
-    REST API backend para gestión de tickets de eventos y soporte técnico.
-    
+    REST API backend para gestión de tickets de soporte técnico.
+
     ## Autenticación
-    La mayoría de endpoints requieren un token JWT. Obténlo en \`POST /api/auth/login\`
-    y envíalo en el header \`Authorization: Bearer <token>\`.
+    La API usa **JWT almacenado en una cookie HTTP-only** llamada \`access_token\`.
+
+    Al hacer \`POST /api/auth/login\`, el servidor establece automáticamente la cookie en el cliente.
+    No es necesario enviar ningún header de autorización manual — la cookie se envía automáticamente
+    con cada petición.
+
+    - **Expiración del token:** 4 horas
+    - **Cookie:** \`access_token\` (httpOnly, SameSite: Strict, Secure en producción)
+    - **Rate limit:** 100 solicitudes por IP cada 15 minutos
+
+    > **Nota para Swagger UI:** Las peticiones desde este explorador NO incluyen la cookie automáticamente.
+    > Para probar los endpoints protegidos usa **curl** con la opción \`-c cookies.txt / -b cookies.txt\`
+    > o **Postman** con la opción "Send cookies" habilitada.
   version: 1.0.0
   contact:
     name: Alejandro Benjumea Aguirre
@@ -76,10 +87,10 @@ tags:
 
 components:
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
   schemas:
     Error:
       type: object
@@ -89,15 +100,14 @@ components:
           example: Not found
     LoginRequest:
       type: object
-      required: [email, password]
+      required: [username, password]
       properties:
-        email:
+        username:
           type: string
-          format: email
-          example: user@example.com
+          example: admin
         password:
           type: string
-          example: "123456"
+          example: "Admin123!"
     LoginResponse:
       type: object
       properties:
@@ -257,7 +267,7 @@ paths:
       tags: [Auth]
       summary: Renovar token JWT
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Token renovado
@@ -303,7 +313,7 @@ paths:
       tags: [Tickets]
       summary: Listar todos los tickets
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Lista de tickets
@@ -317,7 +327,7 @@ paths:
       tags: [Tickets]
       summary: Crear ticket (con archivos adjuntos, máx 6)
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       requestBody:
         required: true
         content:
@@ -334,7 +344,7 @@ paths:
       tags: [Tickets]
       summary: Listar tickets abiertos
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Tickets con estado abierto
@@ -343,7 +353,7 @@ paths:
       tags: [Tickets]
       summary: Listar tickets cerrados
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Tickets con estado cerrado
@@ -352,7 +362,7 @@ paths:
       tags: [Tickets]
       summary: Listar tickets en espera
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Tickets con estado en espera
@@ -361,7 +371,7 @@ paths:
       tags: [Tickets]
       summary: Obtener ticket por ID
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -377,7 +387,7 @@ paths:
       tags: [Tickets]
       summary: Actualizar ticket
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -402,7 +412,7 @@ paths:
       tags: [Tickets]
       summary: Cerrar ticket
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -417,7 +427,7 @@ paths:
       tags: [Ticket Comments]
       summary: Crear comentario con adjuntos (máx 6 archivos)
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       requestBody:
         content:
           multipart/form-data:
@@ -441,7 +451,7 @@ paths:
       tags: [Ticket Comments]
       summary: Obtener comentario por ID
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -455,7 +465,7 @@ paths:
       tags: [Ticket Comments]
       summary: Actualizar comentario
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -469,7 +479,7 @@ paths:
       tags: [Ticket Comments]
       summary: Eliminar comentario
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -484,7 +494,7 @@ paths:
       tags: [Users]
       summary: Listar usuarios
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Lista de usuarios
@@ -492,7 +502,7 @@ paths:
       tags: [Users]
       summary: Crear usuario (con foto de perfil)
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       requestBody:
         content:
           multipart/form-data:
@@ -537,7 +547,7 @@ paths:
       tags: [Users]
       summary: Actualizar usuario
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -563,7 +573,7 @@ paths:
       tags: [Users]
       summary: Eliminar usuario
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -578,7 +588,7 @@ paths:
       tags: [Customers]
       summary: Listar clientes
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Lista de clientes
@@ -586,7 +596,7 @@ paths:
       tags: [Customers]
       summary: Crear cliente
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '201':
           description: Creado
@@ -595,7 +605,7 @@ paths:
       tags: [Customers]
       summary: Obtener cliente por ID
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -609,7 +619,7 @@ paths:
       tags: [Customers]
       summary: Actualizar cliente
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -623,7 +633,7 @@ paths:
       tags: [Customers]
       summary: Eliminar cliente
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -638,7 +648,7 @@ paths:
       tags: [Campus]
       summary: Listar campus
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Lista de campus
@@ -646,7 +656,7 @@ paths:
       tags: [Campus]
       summary: Crear campus
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '201':
           description: Creado
@@ -655,7 +665,7 @@ paths:
       tags: [Campus]
       summary: Obtener campus por ID
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -669,7 +679,7 @@ paths:
       tags: [Campus]
       summary: Actualizar campus
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -683,7 +693,7 @@ paths:
       tags: [Campus]
       summary: Eliminar campus
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -698,7 +708,7 @@ paths:
       tags: [Contacts]
       summary: Listar contactos
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Lista de contactos
@@ -706,7 +716,7 @@ paths:
       tags: [Contacts]
       summary: Crear contacto
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '201':
           description: Creado
@@ -715,7 +725,7 @@ paths:
       tags: [Contacts]
       summary: Obtener contacto por ID
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -729,7 +739,7 @@ paths:
       tags: [Contacts]
       summary: Actualizar contacto
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -743,7 +753,7 @@ paths:
       tags: [Contacts]
       summary: Eliminar contacto
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -758,7 +768,7 @@ paths:
       tags: [Roles]
       summary: Listar roles
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Lista de roles
@@ -766,7 +776,7 @@ paths:
       tags: [Roles]
       summary: Crear rol
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '201':
           description: Creado
@@ -775,7 +785,7 @@ paths:
       tags: [Roles]
       summary: Obtener permisos de un rol
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -790,7 +800,7 @@ paths:
       tags: [Roles]
       summary: Obtener rol por ID
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -804,7 +814,7 @@ paths:
       tags: [Roles]
       summary: Actualizar rol
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -818,7 +828,7 @@ paths:
       tags: [Roles]
       summary: Eliminar rol
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -833,7 +843,7 @@ paths:
       tags: [Permissions]
       summary: Listar permisos
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Lista de permisos
@@ -841,7 +851,7 @@ paths:
       tags: [Permissions]
       summary: Crear permiso
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '201':
           description: Creado
@@ -850,7 +860,7 @@ paths:
       tags: [Permissions]
       summary: Obtener permiso por ID
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -864,7 +874,7 @@ paths:
       tags: [Permissions]
       summary: Actualizar permiso
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -878,7 +888,7 @@ paths:
       tags: [Permissions]
       summary: Eliminar permiso
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -893,7 +903,7 @@ paths:
       tags: [Type Users]
       summary: Listar tipos de usuario
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Lista
@@ -901,7 +911,7 @@ paths:
       tags: [Type Users]
       summary: Crear tipo de usuario
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '201':
           description: Creado
@@ -910,7 +920,7 @@ paths:
       tags: [Type Users]
       summary: Obtener tipo por ID
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -924,7 +934,7 @@ paths:
       tags: [Type Users]
       summary: Actualizar tipo
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -938,7 +948,7 @@ paths:
       tags: [Type Users]
       summary: Eliminar tipo
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -953,7 +963,7 @@ paths:
       tags: [Preforms]
       summary: Listar preformas
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Lista
@@ -961,7 +971,7 @@ paths:
       tags: [Preforms]
       summary: Crear preforma
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '201':
           description: Creada
@@ -970,7 +980,7 @@ paths:
       tags: [Preforms]
       summary: Obtener preforma por ID
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -984,7 +994,7 @@ paths:
       tags: [Preforms]
       summary: Actualizar preforma
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -998,7 +1008,7 @@ paths:
       tags: [Preforms]
       summary: Eliminar preforma
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -1013,7 +1023,7 @@ paths:
       tags: [Survey]
       summary: Listar encuestas
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Lista
@@ -1021,7 +1031,7 @@ paths:
       tags: [Survey]
       summary: Crear encuesta
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       responses:
         '201':
           description: Creada
@@ -1030,7 +1040,7 @@ paths:
       tags: [Survey]
       summary: Obtener encuesta por ID
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -1044,7 +1054,7 @@ paths:
       tags: [Survey]
       summary: Actualizar encuesta
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -1058,7 +1068,7 @@ paths:
       tags: [Survey]
       summary: Eliminar encuesta
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -1073,7 +1083,7 @@ paths:
       tags: [Bitacora]
       summary: Obtener registros de bitácora
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
@@ -1088,7 +1098,7 @@ paths:
       tags: [Bitacora]
       summary: Registrar en bitácora
       security:
-        - bearerAuth: []
+        - cookieAuth: []
       requestBody:
         content:
           application/json:

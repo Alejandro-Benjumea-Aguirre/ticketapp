@@ -5,7 +5,12 @@
   "main": ".eslintrc.js",
   "scripts": {
     "lint:fix": "eslint --fix ./views/emails/*.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "db:migrate": "sequelize-cli db:migrate",
+    "db:migrate:undo": "sequelize-cli db:migrate:undo:all",
+    "db:seed": "sequelize-cli db:seed:all",
+    "db:seed:undo": "sequelize-cli db:seed:undo:all",
+    "db:reset": "sequelize-cli db:migrate:undo:all && sequelize-cli db:migrate && sequelize-cli db:seed:all"
   },
   "author": "",
   "license": "ISC",

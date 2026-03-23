@@ -45,7 +45,10 @@ class Server {
 
   middlewares () {
     // cors
-    this.#app.use(cors())
+    this.#app.use(cors({
+      origin: 'http://localhost:5173',
+      credentials: true
+    }))
 
     // Comprension de gzip
     this.#app.use(compression());
