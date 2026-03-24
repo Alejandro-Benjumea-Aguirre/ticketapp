@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
 const sendEmail = async (to, subject, text, html) => {
   // send mail with defined transport object
   const info = await transporter.sendMail({
-    from: `Pana Bussines SAS <${process.env.SMTP_USER}>`, // sender address
+    from: `Tickets <${process.env.SMTP_USER}>`, // sender address
     to, // list of receivers
     subject, // Subject line
     text, // plain text body

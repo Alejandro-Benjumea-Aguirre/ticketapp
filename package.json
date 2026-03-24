@@ -1,5 +1,5 @@
 {
-  "name": "pana-ticket",
+  "name": "tickets",
   "version": "1.0.0",
   "description": "",
   "main": ".eslintrc.js",
@@ -12,7 +12,7 @@
     "db:seed:undo": "sequelize-cli db:seed:undo:all",
     "db:reset": "sequelize-cli db:migrate:undo:all && sequelize-cli db:migrate && sequelize-cli db:seed:all"
   },
-  "author": "",
+  "author": "Alejandro Benjumea Aguirre",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^6.0.0",

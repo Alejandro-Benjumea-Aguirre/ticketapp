@@ -1,10 +1,10 @@
 const messages = {
-  required: `required`,
-  stringRequired: `stringRequired`,
-  numberRequired: `numberRequired`,
-  string: `string`,
-  number: `number`,
-  email: `email`
+  required: 'required',
+  stringRequired: 'stringRequired',
+  numberRequired: 'numberRequired',
+  string: 'string',
+  number: 'number',
+  email: 'email'
 }
 
 const messageValidator = function (typeMessage, field) {
@@ -14,7 +14,7 @@ const messageValidator = function (typeMessage, field) {
     numberRequired: `${field} debe ser númerico y es requerido`,
     string: `${field} debe ser string`,
     number: `${field} debe ser númerico`,
-    email: `${field} no es valido`    
+    email: `${field} no es valido`
   }
 
   return messages[typeMessage]
@@ -42,4 +42,4 @@ const error = function (req, res, message, status) {
   })
 }
 
-module.exports = {messages, messageValidator, success, error}
+module.exports = { messages, messageValidator, success, error }

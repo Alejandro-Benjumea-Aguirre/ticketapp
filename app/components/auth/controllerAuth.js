@@ -2,27 +2,31 @@ const response = require('../../helpers/response')
 const serviceAuth = require('./serviceAuth')
 
 const login = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password } = req.body
 
   if (!username || !password) {
-    return response.error(req, res, 'El nombre de usuario y la contraseña son obligatorios.', 400);
+    return response.error(req, res, 'El nombre de usuario y la contraseña son obligatorios.', 400)
   }
 
   try {
-    const {user, token} = await serviceAuth.login(username, password);
+    const { status, message, user, token } = await serviceAuth.login(username, password)
+
+    if (!status) {
+      return response.error(req, res, message, 200)
+    }
 
     if (!user || !token) {
-      return response.error(req, res, 'Credenciales inválidas.', 401);
+      return response.error(req, res, 'Credenciales inválidas.', 401)
     }
 
     res.cookie('access_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'Strict'
-    });
-    response.success(req, res, user, 200);
+    })
+    response.success(req, res, user, 200)
   } catch (error) {
-    console.error('Error en la función de login:', error);
+    console.error('Error en la función de login:', error)
     response.error(req, res, 'Hable con el administrador', 500)
   }
 }
@@ -31,23 +35,22 @@ const newToken = async (req, res) => {
   const { id } = req.body
 
   if (!id) {
-    return response.error(req, res, 'El id del usuario es obligatorio.', 400);
+    return response.error(req, res, 'El id del usuario es obligatorio.', 400)
   }
 
   try {
-    const {user, token} = await serviceAuth.newToken(id);
+    const { user, token } = await serviceAuth.newToken(id)
 
     res.cookie('access_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'Strict'
-    });
+    })
     response.success(req, res, user, 200)
   } catch (error) {
-    console.error('Error obteniento el nuevo token:', error);
+    console.error('Error obteniento el nuevo token:', error)
     response.error(req, res, 'Hable con el administrador', 500)
   }
-  
 }
 
 const sendToken = async (req, res) => {
@@ -61,10 +64,9 @@ const sendToken = async (req, res) => {
     const resp = await serviceAuth.sendToken(username)
     response.success(req, res, resp, 200)
   } catch (error) {
-    console.error('Error en el envio del correo con el token:', error);
+    console.error('Error en el envio del correo con el token:', error)
     response.error(req, res, 'Hable con el administrador', 500)
   }
-  
 }
 
 const compareToken = async (req, res) => {
@@ -80,11 +82,9 @@ const compareToken = async (req, res) => {
       response.success(req, res, resp, 200)
     }
   } catch (error) {
-    console.error('Error en el envio del correo con el token:', error);
+    console.error('Error en el envio del correo con el token:', error)
     response.error(req, res, 'Hable con el administrador', 500)
   }
-  
 }
 
 module.exports = { login, newToken, sendToken, compareToken }
-

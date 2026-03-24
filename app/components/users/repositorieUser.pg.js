@@ -17,7 +17,6 @@ const listAll = async () => {
 }
 
 const listById = async (id) => {
-
   const [result] = await db.query(`SELECT usr.username, usr.name, usr.email, st.name AS status, rol.name AS rol, dep.name AS department,
                                       cam.name AS campus, usr.created_date, usr.updated_date, usr.state_id
                                       FROM users usr
@@ -32,7 +31,6 @@ const listById = async (id) => {
 }
 
 const listByUsername = async (username) => {
-
   const [result] = await db.query(`SELECT usr.id AS uid, usr.username, usr.password, usr.name, usr.email, st.name AS status, rol.name AS rol, dep.name AS department,
                                       cam.name AS campus, usr.created_date, usr.updated_date, usr.state_id
                                       FROM users usr
