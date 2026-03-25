@@ -48,8 +48,10 @@ router.patch('/:id', [
   validateCampos
 ], controllerUsers.patchUser)
 
+router.patch('/status/:id', [validateJWT, check('status', messageValidator(messages.required, 'status')).isNumeric().not().isEmpty(), validateCampos], controllerUsers.changeStatus)
+
 router.delete('/:id', validateJWT, controllerUsers.deleteUser)
 
-router.post('/changepass', controllerUsers.changePass)
+router.post('/changepass/:id', validateJWT, controllerUsers.changePass)
 
 module.exports = router

@@ -45,6 +45,11 @@ const update = async (id, body) => {
   return result.modifiedCount
 }
 
+const updateStatus = async (id, status) => {
+  const result = await UserMongo.updateOne({ _id: id }, { $set: {state_id: status} })
+  return result.modifiedCount
+}
+
 const remove = async (id) => {
   const result = await UserMongo.updateOne({ _id: id }, { $set: { state_id: 2 } })
   return result.modifiedCount

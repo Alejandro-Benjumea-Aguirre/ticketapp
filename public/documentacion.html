@@ -596,6 +596,29 @@ paths:
       responses:
         '200':
           description: Eliminado
+  /users/status/:id
+    patch:
+      tags: [Users]
+      summary: Actualiza estado del usuario
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status_id:
+                  type: integer
+      responses:
+        '200':
+          description: Actualizado
   /customers:
     get:
       tags: [Customers]

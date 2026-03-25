@@ -54,6 +54,19 @@ const patchUser = async (req, res) => {
   }
 }
 
+const changeStatus = async (req, res) => {
+  const { id } = req.params
+  const { status } = req.body
+
+  try {
+    const resp = await serviceUsers.changeStatus(id, status)
+    response.success(req, res, resp, 200)
+  } catch (error) {
+    console.log(error)
+    response.error(req, res, 'Hable con el administrador', 500)
+  }
+}
+
 const deleteUser = async (req, res) => {
   const { id } = req.params
 

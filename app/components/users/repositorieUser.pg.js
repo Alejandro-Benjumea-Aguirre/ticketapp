@@ -52,6 +52,12 @@ const update = async (id, body) => {
   return user
 }
 
+const updateStatus = async (id, status) => {
+  const user = await modelUser.update({ state_id: status }, { where: { id }, returning: true })
+
+  return user
+}
+
 const remove = async (id) => {
   const user = await modelUser.update({ state_id: '2' }, { where: { id }, returning: true })
 

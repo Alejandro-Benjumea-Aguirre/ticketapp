@@ -122,6 +122,38 @@ const updateUser = async (id, password, body) => {
   }
 }
 
+const changeStatus = async (id, status) => {
+
+  const user = await repositorieUser.listById(id)
+
+  if (!user) {
+    return `No existe un usuario con el id ${id}`
+  }
+
+  const userUpdate = await repositorieUser.updateStatus(id, status)
+  const bodyBitacora = {
+    eventId: 'por definir',
+    tableAffect: 'users',
+    fieldAffect: `${body}`,
+    dataPrev: `${user}`,
+    dataNew: `${userUpdate}`,
+    username: ''
+  }
+  const bitacora = await serviceBitacora.createBitacora(bodyBitacora)
+
+  if (userUpdate[0] > 0) {
+    return {
+      name: userUpdate[1][0].getDataValue('name'),
+      username: userUpdate[1][0].getDataValue('username'),
+      email: userUpdate[1][0].getDataValue('email'),
+      status: userUpdate[1][0].getDataValue('status_id')
+    }
+  } else {
+    return `No se pudo cambiar el estado al usuario con id: ${id}`
+  }
+  
+}
+
 const inactiveUser = async (id) => {
   const user = await repositorieUser.listById(id)
 
