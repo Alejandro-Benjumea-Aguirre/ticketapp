@@ -1,8 +1,6 @@
-const { QueryTypes } = require('sequelize')
 const modelUser = require('./modelUser')
 
 const db = require('../../../config/postgresql')
-
 
 const listAll = async () => {
   const [result] = await db.query(`SELECT usr.username, usr.name, usr.email, st.name AS estado, rol.name AS rol, dep.name AS department, 
@@ -24,8 +22,7 @@ const listById = async (id) => {
                                       LEFT JOIN roles rol ON usr.rol_id = rol.id
                                       LEFT JOIN departments dep ON usr.department_id = dep.id
                                       LEFT JOIN headquarters cam ON usr.campus_id = cam.id
-                                      WHERE usr.id = :id`,
-                                      { replacements: { id } })
+                                      WHERE usr.id = :id`, { replacements: { id } })
 
   return result[0]
 }
@@ -38,8 +35,7 @@ const listByUsername = async (username) => {
                                       LEFT JOIN roles rol ON usr.rol_id = rol.id
                                       LEFT JOIN departments dep ON usr.department_id = dep.id
                                       LEFT JOIN headquarters cam ON usr.campus_id = cam.id
-                                      WHERE usr.username LIKE :username`,
-                                      { replacements: { username } })
+                                      WHERE usr.username LIKE :username`, { replacements: { username } })
 
   return result[0]
 }
@@ -51,20 +47,19 @@ const created = async (body) => {
 }
 
 const update = async (id, body) => {
-  const user = await modelUser.update(body, { where: { id }, returning: true, })
+  const user = await modelUser.update(body, { where: { id }, returning: true })
 
   return user
 }
 
 const remove = async (id) => {
-  const user = await modelUser.update({ state_id: '2' }, { where: { id }, returning: true, })
+  const user = await modelUser.update({ state_id: '2' }, { where: { id }, returning: true })
 
   return user
 }
 
 const sendToken = async (token, userId) => {
-  const [result] = await db.query(`INSERT INTO rec_pass (user_id, token, created_at) VALUES (:userId, :token, NOW())`,
-                                   { replacements: { userId, token } })
+  const [result] = await db.query('INSERT INTO rec_pass (user_id, token, created_at) VALUES (:userId, :token, NOW())', { replacements: { userId, token } })
 
   return result
 }
@@ -76,19 +71,18 @@ const compareToken = async (token, userId, time) => {
                                    AND extract(year from fecha_cre) = extract(year from NOW())
                                    AND extract(month from fecha_cre) = extract(month from NOW())
                                    AND extract(hour from fecha_cre) = extract(hour from NOW())
-                                   AND (extract(minute from NOW()) - extract(minute from fecha_cre)) < :time`,
-                                   { replacements: { token, userId, time } })
+                                   AND (extract(minute from NOW()) - extract(minute from fecha_cre)) < :time`, { replacements: { token, userId, time } })
 
   return result
 }
 
-module.exports = { 
-  listAll, 
-  listById, 
-  listByUsername, 
-  created, 
-  update, 
-  remove, 
-  sendToken, 
-  compareToken 
+module.exports = {
+  listAll,
+  listById,
+  listByUsername,
+  created,
+  update,
+  remove,
+  sendToken,
+  compareToken
 }

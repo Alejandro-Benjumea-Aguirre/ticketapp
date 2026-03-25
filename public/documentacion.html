@@ -530,6 +530,19 @@ paths:
       responses:
         '200':
           description: Contraseña actualizada
+  /users/username/{username}:
+    get:
+      tags: [Users]
+      summary: Obtener usuario por username
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Usuario encontrado
   /users/{id}:
     get:
       tags: [Users]
