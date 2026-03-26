@@ -3,7 +3,8 @@ const modelUser = require('./modelUser')
 const db = require('../../../config/postgresql')
 
 const listAll = async () => {
-  const [result] = await db.query(`SELECT usr.username, usr.name, usr.email, st.name AS estado, rol.name AS rol, dep.name AS department, 
+  const [result] = await db.query(`SELECT usr.id, usr.username, usr.name, usr.email, st.name AS estado, rol.name AS rol, 
+                                       dep.name AS department, usr.rol_id,
                                        cam.name AS campus, usr.created_date, usr.updated_date, usr.state_id
                                        FROM users usr 
                                        LEFT JOIN states st ON usr.state_id = st.id 
@@ -28,7 +29,8 @@ const listById = async (id) => {
 }
 
 const listByUsername = async (username) => {
-  const [result] = await db.query(`SELECT usr.id AS uid, usr.username, usr.password, usr.name, usr.email, st.name AS status, rol.name AS rol, dep.name AS department,
+  const [result] = await db.query(`SELECT usr.id AS uid, usr.username, usr.password, usr.name, usr.email, 
+                                      st.id as status_id, st.name AS status, rol.id AS rol_id, rol.name AS rol, dep.name AS department,
                                       cam.name AS campus, usr.created_date, usr.updated_date, usr.state_id
                                       FROM users usr
                                       LEFT JOIN states st ON usr.state_id = st.id
@@ -90,5 +92,6 @@ module.exports = {
   update,
   remove,
   sendToken,
-  compareToken
+  compareToken,
+  updateStatus
 }

@@ -8,6 +8,14 @@ const htmlToken = require('../../../views/emails/enviotoken')
 
 const login = async (username, password) => {
   const user = await repositorieUser.listByUsername(username)
+
+  if (user.status_id === 2) {
+    return {
+      status: false,
+      message: 'Usuario inactivo comuniquese con el administrador.'
+    }
+  }
+
   if (!user) {
     return {
       status: false,
@@ -33,7 +41,8 @@ const login = async (username, password) => {
     user: {
       name: user.name,
       username: user.username,
-      email: user.email
+      email: user.email,
+      rol_id: user.rol_id
     },
     token
   }
@@ -54,7 +63,8 @@ const newToken = async (id) => {
       user: {
         name: user.getDataValue('name'),
         username: user.getDataValue('username'),
-        email: user.getDataValue('email')
+        email: user.getDataValue('email'),
+        rol: user.getDataValue('rol_id')
       },
       token
     }

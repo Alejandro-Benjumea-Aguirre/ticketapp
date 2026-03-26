@@ -98,5 +98,6 @@ module.exports = {
   postUser,
   patchUser,
   deleteUser,
-  changePass
+  changePass,
+  changeStatus
 }

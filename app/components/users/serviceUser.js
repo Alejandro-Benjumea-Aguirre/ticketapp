@@ -8,15 +8,17 @@ const listAllUsers = async () => {
   const users = []
   resp.forEach(user => {
     users.push({
+      id: user.id,
       username: user.username,
       name: user.name,
       email: user.email,
       estado: user.estado,
       rol: user.rol,
+      rol_id: user.rol_id,
       departamento: user.department,
       campus: user.campus,
-      fecha_cracion: user.created_date,
-      fecha_actualizacion: user.updated_date
+      create_at: user.created_date,
+      update_at: user.updated_date
     })
   })
   return users
@@ -75,17 +77,16 @@ const createUser = async (body) => {
     dataNew: 'Creacion',
     username: ''
   }
-  if(resp){
-    const bitacora = await serviceBitacora.createBitacora(bodyBitacora)
+  if (resp) {
+    await serviceBitacora.createBitacora(bodyBitacora)
     return {
       name: resp.getDataValue('name'),
       username: resp.getDataValue('username'),
       email: resp.getDataValue('email')
     }
-  }else{
+  } else {
     return 'No se pudo crear el usuario intentalo de nuevo.'
   }
-
 }
 
 const updateUser = async (id, password, body) => {
@@ -109,7 +110,7 @@ const updateUser = async (id, password, body) => {
     dataNew: `${userUpdate}`,
     username: ''
   }
-  const bitacora = await serviceBitacora.createBitacora(bodyBitacora)
+  await serviceBitacora.createBitacora(bodyBitacora)
 
   if (userUpdate[0] > 0) {
     return {
@@ -123,7 +124,6 @@ const updateUser = async (id, password, body) => {
 }
 
 const changeStatus = async (id, status) => {
-
   const user = await repositorieUser.listById(id)
 
   if (!user) {
@@ -134,12 +134,12 @@ const changeStatus = async (id, status) => {
   const bodyBitacora = {
     eventId: 'por definir',
     tableAffect: 'users',
-    fieldAffect: `${body}`,
+    fieldAffect: `${id}`,
     dataPrev: `${user}`,
     dataNew: `${userUpdate}`,
     username: ''
   }
-  const bitacora = await serviceBitacora.createBitacora(bodyBitacora)
+  await serviceBitacora.createBitacora(bodyBitacora)
 
   if (userUpdate[0] > 0) {
     return {
@@ -151,7 +151,6 @@ const changeStatus = async (id, status) => {
   } else {
     return `No se pudo cambiar el estado al usuario con id: ${id}`
   }
-  
 }
 
 const inactiveUser = async (id) => {
@@ -170,7 +169,7 @@ const inactiveUser = async (id) => {
     dataNew: '2',
     username: ''
   }
-  const bitacora = await serviceBitacora.createBitacora(bodyBitacora);
+  await serviceBitacora.createBitacora(bodyBitacora)
 
   if (userInactive[0] > 0) {
     return {
@@ -208,5 +207,6 @@ module.exports = {
   createUser,
   updateUser,
   inactiveUser,
-  changePass
+  changePass,
+  changeStatus
 }

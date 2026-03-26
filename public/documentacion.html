@@ -511,21 +511,27 @@ paths:
       responses:
         '201':
           description: Usuario creado
-  /users/changepass:
+  /users/changepass/{id}:
     post:
       tags: [Users]
       summary: Cambiar contraseña
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         content:
           application/json:
             schema:
               type: object
               properties:
-                email:
+                username:
                   type: string
-                token:
-                  type: string
-                password:
+                newpass:
                   type: string
       responses:
         '200':
@@ -596,7 +602,7 @@ paths:
       responses:
         '200':
           description: Eliminado
-  /users/status/:id
+  /users/status/{id}:
     patch:
       tags: [Users]
       summary: Actualiza estado del usuario
@@ -614,7 +620,7 @@ paths:
             schema:
               type: object
               properties:
-                status_id:
+                status:
                   type: integer
       responses:
         '200':
