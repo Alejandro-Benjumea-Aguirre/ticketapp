@@ -34,7 +34,7 @@ const success = function (req, res, message, status) {
 const error = function (req, res, message, status) {
   const statusCode = status || 500
   const statusMessage = message || 'Internal server error'
-
+  console.log(statusMessage)
   res.status(statusCode).send({
     error: true,
     status: statusCode,
