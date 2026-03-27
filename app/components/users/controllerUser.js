@@ -6,7 +6,8 @@ const getUsers = async (req, res) => {
     const resp = await serviceUsers.listAllUsers()
     response.success(req, res, resp, 200)
   } catch (e) {
-    response.error(req, res, e, 500)
+    const code = e.statusCode || 500
+    response.error(req, res, e.message, code)
   }
 }
 
@@ -16,7 +17,8 @@ const getUser = async (req, res) => {
     const resp = await serviceUsers.listUser(id)
     response.success(req, res, resp, 200)
   } catch (e) {
-    response.error(req, res, e, 500)
+    const code = e.statusCode || 500
+    response.error(req, res, e.message, code)
   }
 }
 
@@ -26,7 +28,8 @@ const getUserByUsername = async (req, res) => {
     const resp = await serviceUsers.listUserByUsername(username)
     response.success(req, res, resp, 200)
   } catch (e) {
-    response.error(req, res, e, 500)
+    const code = e.statusCode || 500
+    response.error(req, res, e.message, code)
   }
 }
 
@@ -34,10 +37,10 @@ const postUser = async (req, res) => {
   const body = req.body
   try {
     const resp = await serviceUsers.createUser(body)
-    response.success(req, res, resp, 200)
+    response.success(req, res, resp, 201)
   } catch (e) {
-    console.log(e)
-    response.error(req, res, e, 500)
+    const code = e.statusCode || 500
+    response.error(req, res, e.message, code)
   }
 }
 
@@ -48,9 +51,9 @@ const patchUser = async (req, res) => {
   try {
     const resp = await serviceUsers.updateUser(id, password, body)
     response.success(req, res, resp, 200)
-  } catch (error) {
-    console.log(error)
-    response.error(req, res, 'Hable con el administrador', 500)
+  } catch (e) {
+    const code = e.statusCode || 500
+    response.error(req, res, e.message, code)
   }
 }
 
@@ -61,9 +64,9 @@ const changeStatus = async (req, res) => {
   try {
     const resp = await serviceUsers.changeStatus(id, status)
     response.success(req, res, resp, 200)
-  } catch (error) {
-    console.log(error)
-    response.error(req, res, 'Hable con el administrador', 500)
+  } catch (e) {
+    const code = e.statusCode || 500
+    response.error(req, res, e.message, code)
   }
 }
 
@@ -73,9 +76,9 @@ const deleteUser = async (req, res) => {
   try {
     const resp = await serviceUsers.inactiveUser(id)
     response.success(req, res, resp, 200)
-  } catch (error) {
-    console.log(error)
-    response.error(req, res, 'Hable con el administrador', 500)
+  } catch (e) {
+    const code = e.statusCode || 500
+    response.error(req, res, e.message, code)
   }
 }
 
@@ -85,9 +88,9 @@ const changePass = async (req, res) => {
   try {
     const resp = await serviceUsers.changePass(newpass, username)
     response.success(req, res, resp, 200)
-  } catch (error) {
-    console.log(error)
-    response.error(req, res, 'Hable con el administrador', 500)
+  } catch (e) {
+    const code = e.statusCode || 500
+    response.error(req, res, e.message, code)
   }
 }
 

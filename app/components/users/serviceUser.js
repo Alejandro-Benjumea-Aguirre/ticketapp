@@ -4,9 +4,13 @@ const repositorieUser = require('./repositorieUser')
 const serviceBitacora = require('../bitacora/serviceBitacora')
 
 const listAllUsers = async () => {
-  const resp = await repositorieUser.listAll()
-  const users = []
-  resp.forEach(user => {
+  const response = await repositorieUser.listAll()
+  if (!response) {
+    const error = new Error(`No existen usuarios aun en l abase de datos`)
+    error.statusCode = 404
+    throw error;
+  }
+  response.forEach(user => {
     users.push({
       id: user.id,
       username: user.username,
@@ -26,39 +30,46 @@ const listAllUsers = async () => {
 
 const listUser = async (id) => {
   const user = await repositorieUser.listById(id)
-  if (user) {
-    return {
-      username: user.username,
-      name: user.name,
-      email: user.email,
-      estado: user.status,
-      rol: user.rol,
-      departamento: user.department,
-      campus: user.campus,
-      fecha_cracion: user.created_date,
-      fecha_actualizacion: user.updated_date
-    }
-  } else {
-    return `No existe ningun usuario con el id ${id}`
+  if (!user) {
+    const error = new Error(`No existe ningún usuario con el id ${id}`)
+    error.statusCode = 404
+    throw error;
   }
+
+  return {
+    username: user.username,
+    name: user.name,
+    email: user.email,
+    estado: user.status,
+    rol: user.rol,
+    rol_id: user.rol_id,
+    departamento: user.department,
+    campus: user.campus,
+    fecha_cracion: user.created_date,
+    fecha_actualizacion: user.updated_date
+  }
+  
 }
 
 const listUserByUsername = async (username) => {
   const user = await repositorieUser.listByUsername(username)
-  if (user) {
-    return {
-      username: user.username,
-      name: user.name,
-      email: user.email,
-      estado: user.status,
-      rol: user.rol,
-      departamento: user.department,
-      campus: user.campus,
-      fecha_cracion: user.created_date,
-      fecha_actualizacion: user.updated_date
-    }
-  } else {
-    return `No existe ningun usuario con el username ${username}`
+  if (!user) {
+    const error = new Error(`No existe ningún usuario con el id ${id}`)
+    error.statusCode = 404
+    throw error;
+  }
+
+  return {
+    username: user.username,
+    name: user.name,
+    email: user.email,
+    estado: user.status,
+    rol: user.rol,
+    rol_id: user.rol_id,
+    departamento: user.department,
+    campus: user.campus,
+    fecha_cracion: user.created_date,
+    fecha_actualizacion: user.updated_date
   }
 }
 
@@ -77,15 +88,17 @@ const createUser = async (body) => {
     dataNew: 'Creacion',
     username: ''
   }
-  if (resp) {
-    await serviceBitacora.createBitacora(bodyBitacora)
-    return {
-      name: resp.getDataValue('name'),
-      username: resp.getDataValue('username'),
-      email: resp.getDataValue('email')
-    }
-  } else {
-    return 'No se pudo crear el usuario intentalo de nuevo.'
+  if (!resp) {
+    const error = new Error(`No se pudo realizar la creación del usuario.`)
+    error.statusCode = 400
+    throw error;
+  }
+
+  await serviceBitacora.createBitacora(bodyBitacora)
+  return {
+    name: resp.getDataValue('name'),
+    username: resp.getDataValue('username'),
+    email: resp.getDataValue('email')
   }
 }
 
@@ -96,12 +109,19 @@ const updateUser = async (id, password, body) => {
   }
 
   const user = await repositorieUser.listById(id)
-
   if (!user) {
-    return `No existe un usuario con el id ${id}`
+    const error = new Error(`No existe un usuario con el id ${id}`)
+    error.statusCode = 404
+    throw error;
   }
 
   const userUpdate = await repositorieUser.update(id, body)
+  if (!userUpdate) {
+    const error = new Error(`No se pudo modificar el usuario con el id: ${id}`)
+    error.statusCode = 400
+    throw error;
+  }
+
   const bodyBitacora = {
     eventId: 'por definir',
     tableAffect: 'users',
@@ -111,26 +131,28 @@ const updateUser = async (id, password, body) => {
     username: ''
   }
   await serviceBitacora.createBitacora(bodyBitacora)
-
-  if (userUpdate[0] > 0) {
-    return {
-      name: userUpdate[1][0].getDataValue('name'),
-      username: userUpdate[1][0].getDataValue('username'),
-      email: userUpdate[1][0].getDataValue('email')
-    }
-  } else {
-    return `No se pudo modificar el usuario con el id: ${id}`
+  return {
+    name: userUpdate[1][0].getDataValue('name'),
+    username: userUpdate[1][0].getDataValue('username'),
+    email: userUpdate[1][0].getDataValue('email')
   }
 }
 
 const changeStatus = async (id, status) => {
   const user = await repositorieUser.listById(id)
-
   if (!user) {
-    return `No existe un usuario con el id ${id}`
+    const error = new Error(`No existe un usuario con el id ${id}`)
+    error.statusCode = 404
+    throw error;
   }
 
   const userUpdate = await repositorieUser.updateStatus(id, status)
+  if (!userUpdate) {
+    const error = new Error(`No se pudo cambiar el estado al usuario con id: ${id}`)
+    error.statusCode = 400
+    throw error;
+  }
+
   const bodyBitacora = {
     eventId: 'por definir',
     tableAffect: 'users',
@@ -139,28 +161,31 @@ const changeStatus = async (id, status) => {
     dataNew: `${userUpdate}`,
     username: ''
   }
-  await serviceBitacora.createBitacora(bodyBitacora)
 
-  if (userUpdate[0] > 0) {
-    return {
-      name: userUpdate[1][0].getDataValue('name'),
-      username: userUpdate[1][0].getDataValue('username'),
-      email: userUpdate[1][0].getDataValue('email'),
-      status: userUpdate[1][0].getDataValue('status_id')
-    }
-  } else {
-    return `No se pudo cambiar el estado al usuario con id: ${id}`
+  await serviceBitacora.createBitacora(bodyBitacora)
+  return {
+    name: userUpdate[1][0].getDataValue('name'),
+    username: userUpdate[1][0].getDataValue('username'),
+    email: userUpdate[1][0].getDataValue('email'),
+    status: userUpdate[1][0].getDataValue('status_id')
   }
 }
 
 const inactiveUser = async (id) => {
   const user = await repositorieUser.listById(id)
-
   if (!user) {
-    return `No existe un usuario con el id: ${id}`
+    const error = new Error(`No existe un usuario con el id ${id}`)
+    error.statusCode = 404
+    throw error;
   }
 
   const userInactive = await repositorieUser.remove(id)
+  if (!userInactive) {
+    const error = new Error(`No se pudo inactivar el usuario con el id: ${id}`)
+    error.statusCode = 400
+    throw error;
+  }
+
   const bodyBitacora = {
     eventId: 'por definir',
     tableAffect: 'users',
@@ -169,35 +194,33 @@ const inactiveUser = async (id) => {
     dataNew: '2',
     username: ''
   }
-  await serviceBitacora.createBitacora(bodyBitacora)
 
-  if (userInactive[0] > 0) {
-    return {
-      name: userInactive[1][0].getDataValue('name'),
-      username: userInactive[1][0].getDataValue('username'),
-      email: userInactive[1][0].getDataValue('email')
-    }
-  } else {
-    return `No se pudo inactivar el usuario con el id: ${id}`
+  await serviceBitacora.createBitacora(bodyBitacora)
+  return {
+    name: userInactive[1][0].getDataValue('name'),
+    username: userInactive[1][0].getDataValue('username'),
+    email: userInactive[1][0].getDataValue('email')
   }
 }
 
 const changePass = async (newpass, username) => {
   const user = await repositorieUser.listByUsername(username)
-
   if (!user) {
-    return `No existe ningun usuario con el codigo ${username}`
+    const error = new Error(`No existe un usuario con el id ${id}`)
+    error.statusCode = 404
+    throw error;
   }
 
   const salt = bcrypt.genSaltSync()
   const password = bcrypt.hashSync(newpass, salt)
   const userUpdate = await repositorieUser.update(user.uid, { password })
-
-  if (userUpdate[0] > 0) {
-    return 'Se realizo la actualizacion de la contraseña correctamente.'
-  } else {
-    return 'No se pudo actualizar la contraseña intentalo de nuevo'
+  if (!userUpdate) {
+    const error = new Error(`No se pudo inactivar el usuario con el id: ${id}`)
+    error.statusCode = 400
+    throw error;
   }
+
+  return 'Se realizo la actualizacion de la contraseña correctamente.'
 }
 
 module.exports = {

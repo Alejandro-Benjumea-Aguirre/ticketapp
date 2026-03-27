@@ -17,7 +17,7 @@ const listAll = async () => {
 
 const listById = async (id) => {
   const [result] = await db.query(`SELECT usr.username, usr.name, usr.email, st.name AS status, rol.name AS rol, dep.name AS department,
-                                      cam.name AS campus, usr.created_date, usr.updated_date, usr.state_id
+                                      cam.name AS campus, usr.created_date, usr.updated_date, usr.state_id, usr.rol_id
                                       FROM users usr
                                       LEFT JOIN states st ON usr.state_id = st.id
                                       LEFT JOIN roles rol ON usr.rol_id = rol.id
@@ -31,7 +31,7 @@ const listById = async (id) => {
 const listByUsername = async (username) => {
   const [result] = await db.query(`SELECT usr.id AS uid, usr.username, usr.password, usr.name, usr.email, 
                                       st.id as status_id, st.name AS status, rol.id AS rol_id, rol.name AS rol, dep.name AS department,
-                                      cam.name AS campus, usr.created_date, usr.updated_date, usr.state_id
+                                      cam.name AS campus, usr.created_date, usr.updated_date, usr.state_id, usr.rol_id
                                       FROM users usr
                                       LEFT JOIN states st ON usr.state_id = st.id
                                       LEFT JOIN roles rol ON usr.rol_id = rol.id
