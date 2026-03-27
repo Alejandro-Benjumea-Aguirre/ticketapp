@@ -6,7 +6,8 @@ const getRoles = async (req, res) => {
     const resp = await serviceRol.listAllRoles()
     response.success(req, res, resp, 200)
   } catch (e) {
-    response.error(req, res, e, 500)
+    const code = e.statusCode || 500
+    response.error(req, res, e.message, code)
   }
 }
 
@@ -16,7 +17,8 @@ const getRol = async (req, res) => {
     const resp = await serviceRol.listRol(id)
     response.success(req, res, resp, 200)
   } catch (e) {
-    response.error(req, res, e, 500)
+    const code = e.statusCode || 500
+    response.error(req, res, e.message, code)
   }
 }
 
@@ -26,41 +28,42 @@ const getRolPermissions = async (req, res) => {
     const resp = await serviceRol.listRolPermisions(id)
     response.success(req, res, resp, 200)
   } catch (error) {
-    response.error(req, res, error, 500)
+    const code = e.statusCode || 500
+    response.error(req, res, e.message, code)
   }
 }
 
 const postRol = async (req, res) => {
-  const body = req.body
   try {
+    const body = req.body
     const resp = await serviceRol.createRol(body)
     response.success(req, res, resp, 200)
   } catch (e) {
-    console.log(e)
-    response.error(req, res, e, 500)
+    const code = e.statusCode || 500
+    response.error(req, res, e.message, code)
   }
 }
 
 const patchRol = async (req, res) => {
-  const { id } = req.params
-  const { id: uid, ...body } = req.body
-
   try {
+    const { id } = req.params
+    const { id: uid, ...body } = req.body
     const resp = await serviceRol.updateRol(id, body)
     response.success(req, res, resp, 200)
-  } catch (error) {
-    response.error(req, res, 'Hable con el administrador', 500)
+  } catch (e) {
+    const code = e.statusCode || 500
+    response.error(req, res, e.message, code)
   }
 }
 
 const deleteRol = async (req, res) => {
-  const { id } = req.params
-
   try {
+    const { id } = req.params
     const resp = await serviceRol.inactiveRol(id)
     response.success(req, res, resp, 200)
-  } catch (error) {
-    response.error(req, res, 'Hable con el administrador', 500)
+  } catch (e) {
+    const code = e.statusCode || 500
+    response.error(req, res, e.message, code)
   }
 }
 

@@ -1,62 +1,69 @@
 const repositorieRol = require('./repositorieRol')
 
 const listAllRoles = async () => {
-  const resp = await repositorieRol.listAll()
+  const response = await repositorieRol.listAll()
 
-  if(resp.length > 0){
-    const roles = []
-    resp.forEach(rol => {
-      roles.push({
-        name: rol.name,
-        description: rol.description,
-        estado: rol.estado,
-        fecha_cre: rol.created_date,
-        fecha_up: rol.updated_date
-      })
-    })
-    return roles
-  }else {
-    return 'No hay roles creados.'
+  if (!response) {
+    const error = new Error(`No hay roles creados.`)
+    error.statusCode = 404
+    throw error
   }
-  
-}
 
-const listRol = async (id) => {
-  const rol = await repositorieRol.listById(id)
-  if (rol) {
-    return {
+  response.forEach(rol => {
+    roles.push({
       name: rol.name,
       description: rol.description,
       estado: rol.estado,
       fecha_cre: rol.created_date,
       fecha_up: rol.updated_date
-    }
-  } else {
-    return `No existe ningun rol con el id ${id}`
+    })
+  })
+  return roles
+}
+
+const listRol = async (id) => {
+  const rol = await repositorieRol.listById(id)
+  if (!rol) {
+    const error = new Error(`No existe ningun rol con el id ${id}`)
+    error.statusCode = 404
+    throw error
+  }
+
+  return {
+    name: rol.name,
+    description: rol.description,
+    estado: rol.estado,
+    fecha_cre: rol.created_date,
+    fecha_up: rol.updated_date
   }
 }
 
 const listRolPermisions = async (id) => {
   const rolPermisions = await repositorieRol.listByRolPermissions(id)
-
-  const permisos = []
-  if(rolPermisions.length > 0){
-    rolPermisions.forEach(permission => {
-      permisos.push({
-        rol: permission.rol,
-        permiso: permission.permiso,
-        estado: permission.estado
-      })
-    })
-    return permisos
-  }else{
-    return 'No hay permisos otorgados para el rol.'
+  if (!rolPermisions) {
+    const error = new Error('No hay permisos otorgados para el rol.')
+    error.statusCode = 404
+    throw error
   }
 
+  const permisos = []
+  rolPermisions.forEach(permission => {
+    permisos.push({
+      rol: permission.rol,
+      permiso: permission.permiso,
+      estado: permission.estado
+    })
+  })
+  return permisos
 }
 
 const createRol = async (body) => {
   const { name } = body
+  if (!name) {
+    const error = new Error('El nombre del rol es obligatorio.')
+    error.statusCode = 404
+    throw error
+  }
 
   const rol = {
     name,
@@ -71,37 +78,41 @@ const createRol = async (body) => {
 
 const updateRol = async (id, body) => {
   const rol = await repositorieRol.listById(id)
-
   if (!rol) {
-    return `No existe un rol con el id ${id}`
+    const error = new Error(`No existe un rol con el id ${id}`)
+    error.statusCode = 404
+    throw error
   }
 
   const rolUpdate = await repositorieRol.update(id, body)
+  if (!rolUpdate) {
+    const error = new Error(`No se pudo modificar el rol con el id: ${id}`)
+    error.statusCode = 404
+    throw error
+  }
 
-  if (rolUpdate > 0) {
-    return {
-      name: rolUpdate.name
-    }
-  } else {
-    return `No se pudo modificar el rol con el id: ${id}`
+  return {
+    name: rolUpdate.name
   }
 }
 
 const inactiveRol = async (id) => {
   const rol = await repositorieRol.listById(id)
-
   if (!rol) {
-    return `No existe un rol con el id: ${id}`
+    const error = new Error(`No existe un rol con el id: ${id}`)
+    error.statusCode = 404
+    throw error
   }
 
   const rolInactive = await repositorieRol.remove(id)
+  if (!rolInactive) {
+    const error = new Error(`No se pudo inactivar el rol con el id: ${id}`)
+    error.statusCode = 404
+    throw error
+  }
 
-  if (rolInactive > 0) {
-    return {
-      name: rolInactive.name
-    }
-  } else {
-    return `No se pudo inactivar el rol con el id: ${id}`
+  return {
+    name: rolInactive.name
   }
 }
 
