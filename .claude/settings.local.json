@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs wc:*)",
+      "Bash(wc -l /c/Users/alejo/Desktop/nodejs/ticketapp/app/components/*/controller*.js)",
+      "Bash(npm install:*)",
+      "Bash(npm audit:*)",
+      "Bash(node -e \"require\\('dotenv'\\).config\\(\\); const Server = require\\('./app/models/server'\\); console.log\\('Modulos cargados correctamente'\\);\")",
+      "Bash(node -e \"require\\('dotenv'\\).config\\(\\); require\\('./app/routes/auth'\\); console.log\\('OK'\\);\")",
+      "Bash(node -e ':*)"
+    ]
+  }
+}

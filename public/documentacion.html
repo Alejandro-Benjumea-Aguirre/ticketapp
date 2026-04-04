@@ -41,10 +41,25 @@ info:
     - **Expiración del token:** 4 horas
     - **Cookie:** \`access_token\` (httpOnly, SameSite: Strict, Secure en producción)
     - **Rate limit:** 100 solicitudes por IP cada 15 minutos
+    - **Logout:** \`POST /api/auth/logout\` elimina la cookie inmediatamente
 
     > **Nota para Swagger UI:** Las peticiones desde este explorador NO incluyen la cookie automáticamente.
     > Para probar los endpoints protegidos usa **curl** con la opción \`-c cookies.txt / -b cookies.txt\`
     > o **Postman** con la opción "Send cookies" habilitada.
+
+    ## Seguridad aplicada
+
+    Cada solicitud pasa por las siguientes capas de protección (en orden):
+
+    | Capa | Herramienta | Descripción |
+    |------|-------------|-------------|
+    | Headers HTTP | helmet | Activa ~15 headers: CSP, HSTS, X-Frame-Options, etc. |
+    | CORS | cors | Solo acepta orígenes definidos en \`CORS_ORIGIN\` |
+    | Rate limiting | express-rate-limit | Máx 100 req/IP cada 15 min |
+    | Tamaño del body | express.json | Rechaza bodies > 10 KB |
+    | Inyección NoSQL | express-mongo-sanitize | Elimina claves con \`$\` y \`.\` |
+    | XSS | sanitize.js | Elimina etiquetas HTML y \`javascript:\` de los inputs |
+    | HPP | hpp | Previene duplicación de parámetros en query string |
   version: 1.0.0
   contact:
     name: Alejandro Benjumea Aguirre
@@ -241,6 +256,21 @@ components:
           type: integer
         campus_id:
           type: integer
+    SuccessMessage:
+      type: object
+      properties:
+        error:
+          type: boolean
+          example: false
+        status:
+          type: integer
+          example: 200
+        body:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Operación realizada correctamente.
 
 paths:
   /auth/login:
@@ -262,6 +292,27 @@ paths:
                 \$ref: '#/components/schemas/LoginResponse'
         '401':
           description: Credenciales inválidas
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Cerrar sesión
+      description: Invalida la cookie `access_token` en el cliente. Requiere token válido para evitar llamadas anónimas.
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Sesión cerrada correctamente
+          content:
+            application/json:
+              schema:
+                \$ref: '#/components/schemas/SuccessMessage'
+              example:
+                error: false
+                status: 200
+                body:
+                  message: Sesión cerrada correctamente.
+        '401':
+          description: Token inválido o ausente
   /auth/renew:
     post:
       tags: [Auth]
@@ -283,13 +334,14 @@ paths:
           application/json:
             schema:
               type: object
+              required: [username]
               properties:
-                email:
+                username:
                   type: string
-                  format: email
+                  example: admin
       responses:
         '200':
-          description: Token enviado
+          description: Token enviado al correo registrado
   /auth/comparetoken:
     post:
       tags: [Auth]
@@ -300,14 +352,19 @@ paths:
           application/json:
             schema:
               type: object
+              required: [token, username]
               properties:
                 token:
                   type: string
+                  example: ABC123
+                username:
+                  type: string
+                  example: admin
       responses:
         '200':
           description: Token válido
         '400':
-          description: Token inválido
+          description: Token inválido o expirado
   /tickets:
     get:
       tags: [Tickets]
@@ -366,6 +423,22 @@ paths:
       responses:
         '200':
           description: Tickets con estado en espera
+  /tickets/user/{id_user}:
+    get:
+      tags: [Tickets]
+      summary: Listar tickets de un usuario
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id_user
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Lista de tickets del usuario
   /tickets/{id}:
     get:
       tags: [Tickets]
@@ -429,22 +502,33 @@ paths:
       security:
         - cookieAuth: []
       requestBody:
+        required: true
         content:
           multipart/form-data:
             schema:
               type: object
+              required: [ticket_id, user_id, coment, public]
               properties:
                 ticket_id:
                   type: integer
-                comment:
+                  example: 5
+                user_id:
+                  type: integer
+                  example: 1
+                coment:
                   type: string
+                  example: Se revisó el problema y se escala a segundo nivel.
+                public:
+                  type: boolean
+                  example: true
+                  description: true = visible al cliente, false = interno
                 file:
                   type: array
                   items:
                     type: string
                     format: binary
       responses:
-        '201':
+        '200':
           description: Comentario creado
   /ticketComment/{id}:
     get:
@@ -514,7 +598,7 @@ paths:
   /users/changepass/{id}:
     post:
       tags: [Users]
-      summary: Cambiar contraseña
+      summary: Cambiar contraseña de un usuario
       security:
         - cookieAuth: []
       parameters:
@@ -523,19 +607,24 @@ paths:
           required: true
           schema:
             type: integer
+          example: 1
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
+              required: [username, newpass]
               properties:
                 username:
                   type: string
+                  example: admin
                 newpass:
                   type: string
+                  example: NuevaContrasena123!
       responses:
         '200':
-          description: Contraseña actualizada
+          description: Contraseña actualizada correctamente
   /users/username/{username}:
     get:
       tags: [Users]
@@ -628,7 +717,7 @@ paths:
   /customers:
     get:
       tags: [Customers]
-      summary: Listar clientes
+      summary: Listar todos los clientes
       security:
         - cookieAuth: []
       responses:
@@ -639,9 +728,36 @@ paths:
       summary: Crear cliente
       security:
         - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  example: Empresa ABC S.A.S
       responses:
-        '201':
-          description: Creado
+        '200':
+          description: Cliente creado
+  /customers/name/{name}:
+    get:
+      tags: [Customers]
+      summary: Buscar cliente por nombre
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+          example: Empresa ABC
+      responses:
+        '200':
+          description: Cliente encontrado
   /customers/{id}:
     get:
       tags: [Customers]
@@ -688,20 +804,66 @@ paths:
   /campus:
     get:
       tags: [Campus]
-      summary: Listar campus
+      summary: Listar todas las sedes
       security:
         - cookieAuth: []
       responses:
         '200':
-          description: Lista de campus
+          description: Lista de sedes
     post:
       tags: [Campus]
-      summary: Crear campus
+      summary: Crear sede
       security:
         - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, client_id]
+              properties:
+                name:
+                  type: string
+                  example: Sede Norte
+                client_id:
+                  type: integer
+                  example: 1
       responses:
-        '201':
-          description: Creado
+        '200':
+          description: Sede creada
+  /campus/name/{name}:
+    get:
+      tags: [Campus]
+      summary: Buscar sede por nombre
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+          example: Sede Norte
+      responses:
+        '200':
+          description: Sede encontrada
+  /campus/client/{client_id}:
+    get:
+      tags: [Campus]
+      summary: Listar sedes de un cliente
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: client_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Lista de sedes del cliente
   /campus/{id}:
     get:
       tags: [Campus]
@@ -748,7 +910,7 @@ paths:
   /contacts:
     get:
       tags: [Contacts]
-      summary: Listar contactos
+      summary: Listar todos los contactos
       security:
         - cookieAuth: []
       responses:
@@ -759,9 +921,36 @@ paths:
       summary: Crear contacto
       security:
         - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, phone, email, clientId, campusId, typeUserId]
+              properties:
+                name:
+                  type: string
+                  example: Juan Pérez
+                phone:
+                  type: string
+                  example: "3001234567"
+                email:
+                  type: string
+                  format: email
+                  example: juan@empresa.com
+                clientId:
+                  type: integer
+                  example: 1
+                campusId:
+                  type: integer
+                  example: 2
+                typeUserId:
+                  type: integer
+                  example: 1
       responses:
-        '201':
-          description: Creado
+        '200':
+          description: Contacto creado
   /contacts/{id}:
     get:
       tags: [Contacts]
@@ -808,7 +997,7 @@ paths:
   /roles:
     get:
       tags: [Roles]
-      summary: Listar roles
+      summary: Listar todos los roles
       security:
         - cookieAuth: []
       responses:
@@ -819,9 +1008,20 @@ paths:
       summary: Crear rol
       security:
         - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  example: Soporte Nivel 2
       responses:
-        '201':
-          description: Creado
+        '200':
+          description: Rol creado
   /roles/permission/{id}:
     get:
       tags: [Roles]
@@ -883,7 +1083,7 @@ paths:
   /permissions:
     get:
       tags: [Permissions]
-      summary: Listar permisos
+      summary: Listar todos los permisos
       security:
         - cookieAuth: []
       responses:
@@ -894,9 +1094,23 @@ paths:
       summary: Crear permiso
       security:
         - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, description]
+              properties:
+                name:
+                  type: string
+                  example: Gestionar tickets
+                description:
+                  type: string
+                  example: Permite crear, editar y cerrar tickets
       responses:
-        '201':
-          description: Creado
+        '200':
+          description: Permiso creado
   /permissions/{id}:
     get:
       tags: [Permissions]
@@ -943,20 +1157,31 @@ paths:
   /typeUser:
     get:
       tags: [Type Users]
-      summary: Listar tipos de usuario
+      summary: Listar todos los tipos de usuario
       security:
         - cookieAuth: []
       responses:
         '200':
-          description: Lista
+          description: Lista de tipos de usuario
     post:
       tags: [Type Users]
       summary: Crear tipo de usuario
       security:
         - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  example: Técnico
       responses:
-        '201':
-          description: Creado
+        '200':
+          description: Tipo de usuario creado
   /typeUser/{id}:
     get:
       tags: [Type Users]
@@ -1003,20 +1228,53 @@ paths:
   /preforms:
     get:
       tags: [Preforms]
-      summary: Listar preformas
+      summary: Listar todas las preformas
       security:
         - cookieAuth: []
       responses:
         '200':
-          description: Lista
+          description: Lista de preformas
     post:
       tags: [Preforms]
       summary: Crear preforma
       security:
         - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, description, suceso_id]
+              properties:
+                title:
+                  type: string
+                  example: Plantilla de error de red
+                description:
+                  type: string
+                  example: Pasos a seguir cuando el cliente reporta pérdida de conectividad
+                suceso_id:
+                  type: integer
+                  example: 2
       responses:
-        '201':
-          description: Creada
+        '200':
+          description: Preforma creada
+  /preforms/suceso/{suceso}:
+    get:
+      tags: [Preforms]
+      summary: Listar preformas por suceso
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: suceso
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 2
+      responses:
+        '200':
+          description: Lista de preformas del suceso
   /preforms/{id}:
     get:
       tags: [Preforms]
@@ -1063,20 +1321,50 @@ paths:
   /survey:
     get:
       tags: [Survey]
-      summary: Listar encuestas
+      summary: Listar todas las encuestas
       security:
         - cookieAuth: []
       responses:
         '200':
-          description: Lista
+          description: Lista de encuestas
     post:
       tags: [Survey]
       summary: Crear encuesta
       security:
         - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ticket_id, user_id]
+              properties:
+                ticket_id:
+                  type: integer
+                  example: 42
+                user_id:
+                  type: integer
+                  example: 3
       responses:
-        '201':
-          description: Creada
+        '200':
+          description: Encuesta creada
+  /survey/client/{client_id}:
+    get:
+      tags: [Survey]
+      summary: Listar encuestas de un cliente
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: client_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Lista de encuestas del cliente
   /survey/{id}:
     get:
       tags: [Survey]
@@ -1139,22 +1427,37 @@ paths:
     post:
       tags: [Bitacora]
       summary: Registrar en bitácora
+      description: Los registros se crean automáticamente en operaciones CRUD. Usar este endpoint solo cuando se necesite un registro manual.
       security:
         - cookieAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
+              required: [eventId, tableAffect, fieldAffect, dataPrev, dataNew, username]
               properties:
-                user_id:
-                  type: integer
-                action:
+                eventId:
                   type: string
-                description:
+                  example: "1"
+                tableAffect:
                   type: string
+                  example: customers
+                fieldAffect:
+                  type: string
+                  example: name
+                dataPrev:
+                  type: string
+                  example: Nombre anterior
+                dataNew:
+                  type: string
+                  example: Nombre nuevo
+                username:
+                  type: string
+                  example: admin
       responses:
-        '201':
+        '200':
           description: Registro creado
 `;
 

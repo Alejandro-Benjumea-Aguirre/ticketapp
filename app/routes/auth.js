@@ -3,19 +3,23 @@ const {
   login,
   newToken,
   sendToken,
-  compareToken
+  compareToken,
+  logout
 } = require('../components/auth/controllerAuth')
 
 const { validateJWT } = require('../middleware/index')
+const catchAsync = require('../utils/catchAsync')
 
 const router = express.Router()
 
-router.post('/login', login)
+router.post('/login', catchAsync(login))
 
-router.post('/renew', validateJWT, newToken)
+router.post('/renew', validateJWT, catchAsync(newToken))
 
-router.post('/sendtoken', sendToken)
+router.post('/sendtoken', catchAsync(sendToken))
 
-router.post('/comparetoken', compareToken)
+router.post('/comparetoken', catchAsync(compareToken))
+
+router.post('/logout', validateJWT, logout)
 
 module.exports = router

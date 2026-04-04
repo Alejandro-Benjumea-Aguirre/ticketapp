@@ -1,67 +1,40 @@
 const response = require('../../helpers/response')
 const serviceCustomer = require('./serviceCustomer')
 
-const getCustomers = async (req, res) => {
-  try {
-    const resp = await serviceCustomer.listAllCustomers()
-    response.success(req, res, resp, 200)
-  } catch (e) {
-    response.error(req, res, e, 500)
-  }
+const getCustomers = async (req, res, next) => {
+  const resp = await serviceCustomer.listAllCustomers()
+  response.success(req, res, resp, 200)
 }
 
-const getCustomer = async (req, res) => {
-  try {
-    const { id } = req.params
-    const resp = await serviceCustomer.listCustomer(id)
-    response.success(req, res, resp, 200)
-  } catch (e) {
-    response.error(req, res, e, 500)
-  }
+const getCustomer = async (req, res, next) => {
+  const { id } = req.params
+  const resp = await serviceCustomer.listCustomer(id)
+  response.success(req, res, resp, 200)
 }
 
-const getCustomerByName = async (req, res) => {
-  try {
-    const { name } = req.params
-    const resp = await serviceCustomer.listCustomerByName(name)
-    response.success(req, res, resp, 200)
-  } catch (e) {
-    response.error(req, res, e, 500)
-  }
+const getCustomerByName = async (req, res, next) => {
+  const { name } = req.params
+  const resp = await serviceCustomer.listCustomerByName(name)
+  response.success(req, res, resp, 200)
 }
 
-const postCustomer = async (req, res) => {
+const postCustomer = async (req, res, next) => {
   const body = req.body
-  try {
-    const resp = await serviceCustomer.createCustomer(body)
-    response.success(req, res, resp, 200)
-  } catch (e) {
-    console.log(e)
-    response.error(req, res, e, 500)
-  }
+  const resp = await serviceCustomer.createCustomer(body)
+  response.success(req, res, resp, 200)
 }
 
-const patchCustomer = async (req, res) => {
+const patchCustomer = async (req, res, next) => {
   const { id } = req.params
   const { id: uid, ...body } = req.body
-
-  try {
-    const resp = await serviceCustomer.updateCustomer(id, body)
-    response.success(req, res, resp, 200)
-  } catch (error) {
-    response.error(req, res, 'Hable con el administrador', 500)
-  }
+  const resp = await serviceCustomer.updateCustomer(id, body)
+  response.success(req, res, resp, 200)
 }
 
-const deleteCustomer = async (req, res) => {
+const deleteCustomer = async (req, res, next) => {
   const { id } = req.params
-
-  try {
-    const resp = await serviceCustomer.inactiveCustomer(id)
-    response.success(req, res, resp, 200)
-  } catch (error) {
-    response.error(req, res, 'Hable con el administrador', 500)
-  }
+  const resp = await serviceCustomer.inactiveCustomer(id)
+  response.success(req, res, resp, 200)
 }
 
 module.exports = {

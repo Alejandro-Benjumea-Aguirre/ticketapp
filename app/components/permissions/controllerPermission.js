@@ -1,57 +1,34 @@
 const response = require('../../helpers/response')
 const servicePermission = require('./servicePermission')
 
-const getPermissions = async (req, res) => {
-  try {
-    const resp = await servicePermission.listAllPermissions()
-    response.success(req, res, resp, 200)
-  } catch (e) {
-    response.error(req, res, e, 500)
-  }
+const getPermissions = async (req, res, next) => {
+  const resp = await servicePermission.listAllPermissions()
+  response.success(req, res, resp, 200)
 }
 
-const getPermission = async (req, res) => {
-  try {
-    const { id } = req.params
-    const resp = await servicePermission.listPermission(id)
-    response.success(req, res, resp, 200)
-  } catch (e) {
-    response.error(req, res, e, 500)
-  }
+const getPermission = async (req, res, next) => {
+  const { id } = req.params
+  const resp = await servicePermission.listPermission(id)
+  response.success(req, res, resp, 200)
 }
 
-const postPermission = async (req, res) => {
+const postPermission = async (req, res, next) => {
   const body = req.body
-  try {
-    const resp = await servicePermission.createPermission(body)
-    response.success(req, res, resp, 200)
-  } catch (e) {
-    console.log(e)
-    response.error(req, res, e, 500)
-  }
+  const resp = await servicePermission.createPermission(body)
+  response.success(req, res, resp, 200)
 }
 
-const patchPermission = async (req, res) => {
+const patchPermission = async (req, res, next) => {
   const { id } = req.params
   const { id: uid, ...body } = req.body
-
-  try {
-    const resp = await servicePermission.updatePermission(id, body)
-    response.success(req, res, resp, 200)
-  } catch (error) {
-    response.error(req, res, 'Hable con el administrador', 500)
-  }
+  const resp = await servicePermission.updatePermission(id, body)
+  response.success(req, res, resp, 200)
 }
 
-const deletePermission = async (req, res) => {
+const deletePermission = async (req, res, next) => {
   const { id } = req.params
-
-  try {
-    const resp = await servicePermission.inactivePermission(id)
-    response.success(req, res, resp, 200)
-  } catch (error) {
-    response.error(req, res, 'Hable con el administrador', 500)
-  }
+  const resp = await servicePermission.inactivePermission(id)
+  response.success(req, res, resp, 200)
 }
 
 module.exports = {

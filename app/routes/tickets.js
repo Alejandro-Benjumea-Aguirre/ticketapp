@@ -3,14 +3,14 @@ const { check } = require('express-validator')
 const { messages, messageValidator } = require('../helpers/response')
 
 const {
-  getTickets, 
+  getTickets,
   getTicket,
   getTicketByUser,
   getTicketByAbiertos,
   getTicketByCerrados,
   getTicketByEspera,
-  postTicket, 
-  patchTicket, 
+  postTicket,
+  patchTicket,
   closeTicket
 } = require('../components/tickets/controllerTicket')
 
@@ -19,20 +19,21 @@ const { validateCampos, validateJWT } = require('../middleware/index')
 const { isUserIdValid, isValidPassword } = require('../helpers/validatorsDB')
 
 const upload = require('../helpers/uploadFile')
+const catchAsync = require('../utils/catchAsync')
 
 const router = Router()
 
-router.get('/', validateJWT, getTickets)
+router.get('/', validateJWT, catchAsync(getTickets))
 
-router.get('/abiertos', validateJWT, getTicketByAbiertos)
+router.get('/abiertos', validateJWT, catchAsync(getTicketByAbiertos))
 
-router.get('/cerrados', validateJWT, getTicketByCerrados)
+router.get('/cerrados', validateJWT, catchAsync(getTicketByCerrados))
 
-router.get('/enespera', validateJWT, getTicketByEspera)
+router.get('/enespera', validateJWT, catchAsync(getTicketByEspera))
 
-router.get('/user/:id_user', validateJWT, getTicketByUser)
+router.get('/user/:id_user', validateJWT, catchAsync(getTicketByUser))
 
-router.get('/:id', validateJWT, getTicket)
+router.get('/:id', validateJWT, catchAsync(getTicket))
 
 router.post('/', [
   validateJWT,
@@ -48,7 +49,7 @@ router.post('/', [
   validateCampos,
   upload.array('file', 6)
 ],
-postTicket)
+catchAsync(postTicket))
 
 router.patch('/:id', [
   validateJWT,
@@ -56,8 +57,8 @@ router.patch('/:id', [
   check('email', 'El email no es valido.').isEmail(),
   check('password').custom(isValidPassword),
   validateCampos
-], patchTicket)
+], catchAsync(patchTicket))
 
-router.post('/close/:id', validateJWT, closeTicket)
+router.post('/close/:id', validateJWT, catchAsync(closeTicket))
 
 module.exports = router

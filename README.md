@@ -14,6 +14,9 @@ REST API backend para la gestión de tickets de soporte técnico. Permite a los 
 | **MongoDB** | >= 6 | Base de datos no relacional (Mongoose) |
 | **JWT** | — | Autenticación mediante cookies HTTP-only |
 | **bcrypt** | — | Hash de contraseñas |
+| **Helmet** | — | Headers de seguridad HTTP |
+| **express-mongo-sanitize** | — | Prevención de inyección NoSQL |
+| **hpp** | — | Prevención de HTTP Parameter Pollution |
 | **Multer** | — | Carga de archivos |
 | **Nodemailer** | — | Envío de correos electrónicos |
 
@@ -88,7 +91,10 @@ MONGO_URI=mongodb://localhost:27017/ticketapp
 # Entorno de ejecución: development | production
 NODE_ENV=development
 
-# Clave secreta para firmar los JWT
+# Origenes permitidos para CORS (separados por coma)
+CORS_ORIGIN=http://localhost:5173
+
+# Clave secreta para firmar los JWT (mínimo 64 caracteres aleatorios)
 SECRETORPRIVATEDKEY=una_clave_secreta_muy_larga_y_segura
 
 # Configuración del servidor de correo SMTP
@@ -146,7 +152,8 @@ ticketapp/
 │   │   └── uploads/
 │   ├── middleware/
 │   │   ├── validateJWT.js          # Verificación de token JWT desde cookie
-│   │   └── validateCampos.js       # Validación de campos con express-validator
+│   │   ├── validateCampos.js       # Validación de campos con express-validator
+│   │   └── sanitize.js             # Sanitización XSS en body, query y params
 │   └── helpers/
 │       ├── response.js             # Formato estándar de respuestas
 │       ├── generateJWT.js          # Generación de tokens JWT
@@ -171,6 +178,8 @@ El sistema usa **JWT almacenado en una cookie HTTP-only**. Al hacer login, el se
 - **Rate limit:** 100 solicitudes por IP cada 15 minutos
 
 No es necesario enviar un header `Authorization`. La cookie se envía automáticamente con cada solicitud si el cliente la soporta (navegadores, curl con `-c`/`-b`, Postman con cookies habilitadas).
+
+Para cerrar sesión usa `POST /api/auth/logout`. El servidor invalida la cookie en el cliente inmediatamente.
 
 ---
 
@@ -210,6 +219,7 @@ En caso de error:
 | Método | Ruta | Descripción | Auth |
 |--------|------|-------------|------|
 | `POST` | `/api/auth/login` | Iniciar sesión. Establece la cookie `access_token` | ❌ |
+| `POST` | `/api/auth/logout` | Cerrar sesión. Elimina la cookie `access_token` | ✅ JWT |
 | `POST` | `/api/auth/renew` | Renovar el token JWT | ✅ JWT |
 | `POST` | `/api/auth/sendtoken` | Enviar token de recuperación de contraseña al correo | ❌ |
 | `POST` | `/api/auth/comparetoken` | Validar token de recuperación de contraseña | ❌ |
@@ -244,12 +254,13 @@ En caso de error:
 | Método | Ruta | Descripción | Auth |
 |--------|------|-------------|------|
 | `GET` | `/api/users` | Listar todos los usuarios | ✅ JWT |
-| `GET` | `/api/users/:id` | Obtener usuario por ID | ✅ JWT |
-| `GET` | `/api/users/username/:username` | Obtener usuario por nombre de usuario | ✅ JWT |
+| `GET` | `/api/users/:id` | Obtener usuario por ID | ❌ |
+| `GET` | `/api/users/username/:username` | Obtener usuario por nombre de usuario | ❌ |
 | `POST` | `/api/users` | Crear nuevo usuario (soporta subida de foto) | ✅ JWT |
-| `PATCH` | `/api/users/:id` | Actualizar usuario por ID | ✅ JWT |
+| `PATCH` | `/api/users/:id` | Actualizar usuario | ✅ JWT |
+| `PATCH` | `/api/users/status/:id` | Cambiar estado del usuario | ✅ JWT |
 | `DELETE` | `/api/users/:id` | Inactivar usuario (state_id = 2) | ✅ JWT |
-| `POST` | `/api/users/changepass` | Cambiar contraseña de usuario | ❌ |
+| `POST` | `/api/users/changepass/:id` | Cambiar contraseña de usuario | ✅ JWT |
 
 **Body POST /api/users** (`multipart/form-data`):
 ```
@@ -264,7 +275,14 @@ campus_id   number  requerido
 file        file    opcional (imagen de perfil)
 ```
 
-**Body POST /api/users/changepass:**
+**Body PATCH /api/users/status/:id:**
+```json
+{
+  "status": 1
+}
+```
+
+**Body POST /api/users/changepass/:id:**
 ```json
 {
   "username": "admin",
@@ -315,11 +333,20 @@ file           file    opcional (hasta 6 archivos: jpeg, png, pdf, xls, xlsx, cs
 
 | Método | Ruta | Descripción | Auth |
 |--------|------|-------------|------|
-| `GET` | `/api/ticketComment/:ticket_id` | Listar comentarios de un ticket | ✅ JWT |
+| `GET` | `/api/ticketComment/:ticket_id` | Listar todos los comentarios de un ticket | ✅ JWT |
 | `GET` | `/api/ticketComment/:id` | Obtener comentario por ID | ✅ JWT |
 | `POST` | `/api/ticketComment` | Crear comentario (hasta 6 archivos adjuntos) | ✅ JWT |
 | `PATCH` | `/api/ticketComment/:id` | Actualizar comentario | ✅ JWT |
 | `DELETE` | `/api/ticketComment/:id` | Eliminar comentario | ✅ JWT |
+
+**Body POST /api/ticketComment** (`multipart/form-data`):
+```
+ticket_id   number  requerido
+user_id     number  requerido
+coment      string  requerido
+public      boolean requerido (true = visible al cliente)
+file        file    opcional (hasta 6 archivos)
+```
 
 ---
 
@@ -395,6 +422,14 @@ file           file    opcional (hasta 6 archivos: jpeg, png, pdf, xls, xlsx, cs
 | `PATCH` | `/api/permissions/:id` | Actualizar permiso | ✅ JWT |
 | `DELETE` | `/api/permissions/:id` | Inactivar permiso | ✅ JWT |
 
+**Body POST /api/permissions:**
+```json
+{
+  "name": "Gestionar tickets",
+  "description": "Permite crear, editar y cerrar tickets"
+}
+```
+
 ---
 
 ### Contactos — `/api/contacts`
@@ -431,6 +466,13 @@ file           file    opcional (hasta 6 archivos: jpeg, png, pdf, xls, xlsx, cs
 | `PATCH` | `/api/typeUser/:id` | Actualizar tipo de usuario | ✅ JWT |
 | `DELETE` | `/api/typeUser/:id` | Inactivar tipo de usuario | ✅ JWT |
 
+**Body POST /api/typeUser:**
+```json
+{
+  "name": "Técnico"
+}
+```
+
 ---
 
 ### Preformas — `/api/preforms`
@@ -466,6 +508,14 @@ file           file    opcional (hasta 6 archivos: jpeg, png, pdf, xls, xlsx, cs
 | `PATCH` | `/api/survey/:id` | Actualizar encuesta | ✅ JWT |
 | `DELETE` | `/api/survey/:id` | Inactivar encuesta | ✅ JWT |
 
+**Body POST /api/survey:**
+```json
+{
+  "ticket_id": 1,
+  "user_id": 3
+}
+```
+
 ---
 
 ### Bitácora — `/api/bitacora`
@@ -474,6 +524,20 @@ file           file    opcional (hasta 6 archivos: jpeg, png, pdf, xls, xlsx, cs
 |--------|------|-------------|------|
 | `GET` | `/api/bitacora/:id` | Obtener registro de auditoría por ID | ✅ JWT |
 | `POST` | `/api/bitacora` | Crear registro de auditoría | ✅ JWT |
+
+> Los registros de bitácora se crean automáticamente en operaciones de creación, actualización e inactivación de entidades. Normalmente no necesitas llamar este endpoint directamente.
+
+**Body POST /api/bitacora:**
+```json
+{
+  "eventId": "1",
+  "tableAffect": "customers",
+  "fieldAffect": "name",
+  "dataPrev": "Nombre anterior",
+  "dataNew": "Nombre nuevo",
+  "username": "admin"
+}
+```
 
 ---
 
@@ -522,6 +586,22 @@ curl -X POST http://localhost:8000/api/tickets \
   -F "description=Al intentar procesar el pago aparece un error 500" \
   -F "email=usuario@empresa.com" \
   -F "file=@captura.png"
+```
+
+### Cerrar sesión
+
+```bash
+curl -X POST http://localhost:8000/api/auth/logout \
+  -b cookies.txt
+```
+
+**Respuesta:**
+```json
+{
+  "error": false,
+  "status": 200,
+  "body": { "message": "Sesión cerrada correctamente." }
+}
 ```
 
 ### Cerrar un ticket
@@ -600,11 +680,28 @@ El proyecto usa **Sequelize CLI** para gestionar el esquema de la base de datos 
 
 ---
 
+## Seguridad
+
+La API aplica las siguientes capas de protección en cada solicitud (en orden de ejecución):
+
+| Capa | Herramienta | Qué protege |
+|------|-------------|-------------|
+| Headers HTTP | `helmet` | Activa ~15 headers de seguridad: `X-Content-Type-Options`, `X-Frame-Options`, `Strict-Transport-Security`, `Content-Security-Policy`, etc. |
+| CORS | `cors` | Solo acepta peticiones de los orígenes definidos en `CORS_ORIGIN` |
+| Rate limiting | `express-rate-limit` | Máximo 100 solicitudes por IP cada 15 minutos |
+| Tamaño del body | `express.json` | Rechaza bodies mayores a 10 KB |
+| Inyección NoSQL | `express-mongo-sanitize` | Elimina claves con `$` y `.` del body/query/params |
+| XSS | `sanitize.js` | Elimina etiquetas HTML y `javascript:` de todos los strings de entrada |
+| HTTP Parameter Pollution | `hpp` | Previene duplicación de parámetros en la query string |
+
+---
+
 ## Límites y restricciones
 
 | Parámetro | Valor |
 |-----------|-------|
 | Rate limit | 100 solicitudes por IP cada 15 minutos |
+| Tamaño máximo del body JSON | 10 KB |
 | Tamaño máximo de archivo | 250 KB por archivo |
 | Archivos por ticket/comentario | Hasta 6 archivos |
 | Tipos de archivo permitidos | `jpeg`, `jpg`, `png`, `pdf`, `xls`, `xlsx`, `csv`, `doc`, `txt` |

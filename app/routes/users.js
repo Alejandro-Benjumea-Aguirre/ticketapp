@@ -5,6 +5,7 @@ const { messages, messageValidator } = require('../helpers/response')
 const controllerUsers = require('../components/users/controllerUser')
 const { validateCampos, validateJWT } = require('../middleware/index')
 const upload = require('../helpers/uploadFile')
+const catchAsync = require('../utils/catchAsync')
 
 const {
   isUserNameValid,
@@ -13,11 +14,11 @@ const {
 
 const router = Router()
 
-router.get('/', validateJWT, controllerUsers.getUsers)
+router.get('/', validateJWT, catchAsync(controllerUsers.getUsers))
 
-router.get('/username/:username', controllerUsers.getUserByUsername)
+router.get('/username/:username', catchAsync(controllerUsers.getUserByUsername))
 
-router.get('/:id', controllerUsers.getUser)
+router.get('/:id', catchAsync(controllerUsers.getUser))
 
 router.post('/', [
   validateJWT,
@@ -31,14 +32,10 @@ router.post('/', [
   check('campus_id', messageValidator(messages.numberRequired, 'campus_id')).not().isEmpty().isNumeric(),
   check('username').custom(isUserNameValid),
   check('password').custom(isValidPassword),
-  /*     check('rol_id').custom(),
-    check('state_id').custom(),
-    check('department_id').custom(),
-    check('campus_id').custom(), */
   validateCampos,
   upload.single('file')
 ],
-controllerUsers.postUser)
+catchAsync(controllerUsers.postUser))
 
 router.patch('/:id', [
   validateJWT,
@@ -46,15 +43,15 @@ router.patch('/:id', [
   check('email', messageValidator(messages.email, 'email')).isEmail(),
   check('password').custom(isValidPassword),
   validateCampos
-], controllerUsers.patchUser)
+], catchAsync(controllerUsers.patchUser))
 
 router.patch('/status/:id', [
   validateJWT,
   check('status?id', messageValidator(messages.required, 'status')).isNumeric().not().isEmpty()
-], controllerUsers.changeStatus)
+], catchAsync(controllerUsers.changeStatus))
 
-router.delete('/:id', validateJWT, controllerUsers.deleteUser)
+router.delete('/:id', validateJWT, catchAsync(controllerUsers.deleteUser))
 
-router.post('/changepass/:id', validateJWT, controllerUsers.changePass)
+router.post('/changepass/:id', validateJWT, catchAsync(controllerUsers.changePass))
 
 module.exports = router

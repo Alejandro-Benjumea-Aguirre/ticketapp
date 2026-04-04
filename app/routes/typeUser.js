@@ -1,19 +1,19 @@
 const { Router } = require('express')
-// const { check } = require('express-validator')
 
 const controllerTypeUser = require('../components/typeUser/controllerTypeUser')
 const { validateJWT } = require('../middleware/index')
+const catchAsync = require('../utils/catchAsync')
 
 const router = Router()
 
-router.get('/', validateJWT, controllerTypeUser.getTypeUsers)
+router.get('/', validateJWT, catchAsync(controllerTypeUser.getTypeUsers))
 
-router.get('/:id', validateJWT, controllerTypeUser.getTypeUser)
+router.get('/:id', validateJWT, catchAsync(controllerTypeUser.getTypeUser))
 
-router.post('/', validateJWT, controllerTypeUser.postTypeUser)
+router.post('/', validateJWT, catchAsync(controllerTypeUser.postTypeUser))
 
-router.patch('/:id', validateJWT, controllerTypeUser.patchTypeUser)
+router.patch('/:id', validateJWT, catchAsync(controllerTypeUser.patchTypeUser))
 
-router.delete('/:id', validateJWT, controllerTypeUser.deleteTypeUser)
+router.delete('/:id', validateJWT, catchAsync(controllerTypeUser.deleteTypeUser))
 
 module.exports = router

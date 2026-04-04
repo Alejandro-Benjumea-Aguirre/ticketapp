@@ -1,13 +1,13 @@
 const { Router } = require('express')
-// const { check } = require('express-validator')
 
 const controllerBitacora = require('../components/bitacora/controllerBitacora')
 const { validateJWT } = require('../middleware/index')
+const catchAsync = require('../utils/catchAsync')
 
 const router = Router()
 
-router.get('/:id', validateJWT, controllerBitacora.getBitacora)
+router.get('/:id', validateJWT, catchAsync(controllerBitacora.getBitacora))
 
-router.post('/', validateJWT, controllerBitacora.postBitacora)
+router.post('/', validateJWT, catchAsync(controllerBitacora.postBitacora))
 
 module.exports = router

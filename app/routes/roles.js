@@ -1,21 +1,21 @@
 const { Router } = require('express')
-// const { check } = require('express-validator')
 
 const controllerRol = require('../components/roles/controllerRol')
 const { validateJWT } = require('../middleware/index')
+const catchAsync = require('../utils/catchAsync')
 
 const router = Router()
 
-router.get('/', validateJWT, controllerRol.getRoles)
+router.get('/', validateJWT, catchAsync(controllerRol.getRoles))
 
-router.get('/:id', validateJWT, controllerRol.getRol)
+router.get('/:id', validateJWT, catchAsync(controllerRol.getRol))
 
-router.get('/permission/:id', validateJWT, controllerRol.getRolPermissions)
+router.get('/permission/:id', validateJWT, catchAsync(controllerRol.getRolPermissions))
 
-router.post('/', validateJWT, controllerRol.postRol)
+router.post('/', validateJWT, catchAsync(controllerRol.postRol))
 
-router.patch('/:id', validateJWT, controllerRol.patchRol)
+router.patch('/:id', validateJWT, catchAsync(controllerRol.patchRol))
 
-router.delete('/:id', validateJWT, controllerRol.deleteRol)
+router.delete('/:id', validateJWT, catchAsync(controllerRol.deleteRol))
 
 module.exports = router
