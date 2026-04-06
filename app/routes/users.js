@@ -45,9 +45,11 @@ router.patch('/:id', [
   validateCampos
 ], catchAsync(controllerUsers.patchUser))
 
-router.patch('/status/:id', [
+router.patch(':id/status/', [
   validateJWT,
-  check('status?id', messageValidator(messages.required, 'status')).isNumeric().not().isEmpty()
+  check('id', 'El ID debe ser un número válido').isNumeric(), 
+  check('status', messageValidator(messages.required, 'status')).not().isEmpty().isNumeric(),
+  validarCampos
 ], catchAsync(controllerUsers.changeStatus))
 
 router.delete('/:id', validateJWT, catchAsync(controllerUsers.deleteUser))

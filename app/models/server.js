@@ -15,7 +15,7 @@ class Server {
   #port
 
   constructor () {
-    this.#app = express()
+    this.#app  = express()
     this.#port = process.env.PORT || '8000'
 
     this.dbConecction()

@@ -37,11 +37,19 @@ const deleteRol = async (req, res, next) => {
   response.success(req, res, resp, 200)
 }
 
+const updateStatus = async (req, res, next) => {
+  const { id } = req.params
+  const { status } = req.body
+  const resp = await serviceRol.updateStatus(id, status)
+  response.success(req, res, resp, 200)
+}
+
 module.exports = {
   getRoles,
   getRol,
   getRolPermissions,
   postRol,
   patchRol,
-  deleteRol
+  deleteRol,
+  updateStatus
 }

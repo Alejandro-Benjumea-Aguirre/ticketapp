@@ -61,4 +61,19 @@ const remove = async (id) => {
   return rol
 }
 
-module.exports = { listAll, listById, listByName, listByRolPermissions, created, update, remove }
+const updateStatus = async (id, status) => {
+  const rol = await modelRol.update({ state_id: status }, { where: { id }, returning: true })
+
+  return rol
+}
+
+module.exports = { 
+  listAll, 
+  listById, 
+  listByName, 
+  listByRolPermissions, 
+  created, 
+  update, 
+  remove, 
+  updateStatus 
+}

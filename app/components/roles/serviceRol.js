@@ -116,11 +116,32 @@ const inactiveRol = async (id) => {
   }
 }
 
+const updateStatus = async (id, status) => {
+  const rol = await repositorieRol.listById(id)
+  if (!rol) {
+    const error = new Error(`No existe un rol con el id: ${id}`)
+    error.statusCode = 404
+    throw error
+  }
+
+  const rolChange = await repositorieRol.updateStatus(id, status)
+  if (!rolChange) {
+    const error = new Error(`No se pudo inactivar el rol con el id: ${id}`)
+    error.statusCode = 404
+    throw error
+  }
+
+  return {
+    name: rolChange.name
+  }
+}
+
 module.exports = { 
   listAllRoles, 
   listRol, 
   listRolPermisions, 
   createRol, 
   updateRol, 
-  inactiveRol 
+  inactiveRol,
+  updateStatus
 }
