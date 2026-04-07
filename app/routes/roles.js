@@ -1,7 +1,9 @@
 const { Router } = require('express')
+const { check } = require('express-validator')
+const { messages, messageValidator } = require('../helpers/response')
 
 const controllerRol = require('../components/roles/controllerRol')
-const { validateJWT } = require('../middleware/index')
+const { validateJWT, validateCampos } = require('../middleware/index')
 const catchAsync = require('../utils/catchAsync')
 
 const router = Router()
@@ -22,7 +24,7 @@ router.patch('/:id/status', [
     validateJWT,
     check('id', 'El ID debe ser un número válido').isNumeric(), 
     check('status', messageValidator(messages.required, 'status')).not().isEmpty().isNumeric(),
-    validarCampos
+    validateCampos
 ], catchAsync(controllerRol.updateStatus));
 
 module.exports = router

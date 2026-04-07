@@ -49,7 +49,7 @@ router.patch(':id/status/', [
   validateJWT,
   check('id', 'El ID debe ser un número válido').isNumeric(), 
   check('status', messageValidator(messages.required, 'status')).not().isEmpty().isNumeric(),
-  validarCampos
+  validateCampos
 ], catchAsync(controllerUsers.changeStatus))
 
 router.delete('/:id', validateJWT, catchAsync(controllerUsers.deleteUser))

@@ -8,8 +8,9 @@ const listAllUsers = async () => {
   if (!response) {
     const error = new Error(`No existen usuarios aun en l abase de datos`)
     error.statusCode = 404
-    throw error;
+    throw error
   }
+  let users = []
   response.forEach(user => {
     users.push({
       id: user.id,
