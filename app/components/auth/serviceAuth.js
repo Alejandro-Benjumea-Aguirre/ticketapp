@@ -10,22 +10,22 @@ const login = async (username, password) => {
   const user = await repositorieUser.listByUsername(username)
 
   if (user.status_id === 2) {
-    const error = new Error(`Usuario inactivo comuniquese con el administrador.`)
-    error.statusCode = 404
+    const error = new Error('Usuario inactivo comuniquese con el administrador.')
+    error.statusCode = 403
     throw error
   }
 
   if (!user) {
-    const error = new Error(`Usuario/contraseña incorrectos.`)
-    error.statusCode = 404
+    const error = new Error('Usuario/contraseña incorrectos.')
+    error.statusCode = 401
     throw error
   }
 
   // Verificacion de password
   const isValidPassword = bcrypt.compareSync(password, user.password)
   if (!isValidPassword) {
-    const error = new Error(`Usuario/contraseña incorrectos.`)
-    error.statusCode = 404
+    const error = new Error('Usuario/contraseña incorrectos.')
+    error.statusCode = 401
     throw error
   }
 
@@ -44,12 +44,11 @@ const login = async (username, password) => {
 }
 
 const newToken = async (id) => {
-
   const user = await repositorieUser.listById(id)
   if (!user) {
-      const error = new Error(`No existe el usuario con el id.`)
-      error.statusCode = 404
-      throw error
+    const error = new Error('No existe el usuario con el id.')
+    error.statusCode = 404
+    throw error
   }
 
   const token = await generarJWT(String(id))
@@ -66,7 +65,6 @@ const newToken = async (id) => {
 }
 
 const sendToken = async (username) => {
-
   const user = await repositorieUser.listByUsername(username)
   if (!user) {
     const error = new Error('No existe usuario con el username enviado.')

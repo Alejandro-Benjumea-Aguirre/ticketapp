@@ -1,7 +1,7 @@
 const { DataTypes, Sequelize } = require('sequelize')
 const db = require('../../../config/postgresql')
 
-const Bitacora = db.define('bitacora', {
+const Bitacora = db.define('bitacoras', {
 
   id: {
     allowNull: false,
@@ -10,7 +10,7 @@ const Bitacora = db.define('bitacora', {
     type: DataTypes.INTEGER
   },
   eventId: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.INTEGER,
     field: 'event_id',
     references: {

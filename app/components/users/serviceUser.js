@@ -6,7 +6,7 @@ const serviceBitacora = require('../bitacora/serviceBitacora')
 const listAllUsers = async () => {
   const response = await repositorieUser.listAll()
   if (!response) {
-    const error = new Error(`No existen usuarios aun en l abase de datos`)
+    const error = new Error('No existen usuarios aun en la abase de datos')
     error.statusCode = 404
     throw error
   }
@@ -34,7 +34,7 @@ const listUser = async (id) => {
   if (!user) {
     const error = new Error(`No existe ningún usuario con el id ${id}`)
     error.statusCode = 404
-    throw error;
+    throw error
   }
 
   return {
@@ -49,15 +49,14 @@ const listUser = async (id) => {
     fecha_cracion: user.created_date,
     fecha_actualizacion: user.updated_date
   }
-  
 }
 
 const listUserByUsername = async (username) => {
   const user = await repositorieUser.listByUsername(username)
   if (!user) {
-    const error = new Error(`No existe ningún usuario con el id ${id}`)
+    const error = new Error(`No existe ningún usuario con el username ${username}`)
     error.statusCode = 404
-    throw error;
+    throw error
   }
 
   return {
@@ -82,7 +81,7 @@ const createUser = async (body) => {
 
   const resp = await repositorieUser.created(body)
   const bodyBitacora = {
-    eventId: 'por definir',
+    eventId: null,
     tableAffect: 'users',
     fieldAffect: '',
     dataPrev: '',
@@ -90,9 +89,9 @@ const createUser = async (body) => {
     username: ''
   }
   if (!resp) {
-    const error = new Error(`No se pudo realizar la creación del usuario.`)
+    const error = new Error('No se pudo realizar la creación del usuario.')
     error.statusCode = 400
-    throw error;
+    throw error
   }
 
   await serviceBitacora.createBitacora(bodyBitacora)
@@ -113,18 +112,18 @@ const updateUser = async (id, password, body) => {
   if (!user) {
     const error = new Error(`No existe un usuario con el id ${id}`)
     error.statusCode = 404
-    throw error;
+    throw error
   }
 
   const userUpdate = await repositorieUser.update(id, body)
   if (!userUpdate) {
     const error = new Error(`No se pudo modificar el usuario con el id: ${id}`)
     error.statusCode = 400
-    throw error;
+    throw error
   }
 
   const bodyBitacora = {
-    eventId: 'por definir',
+    eventId: null,
     tableAffect: 'users',
     fieldAffect: `${body}`,
     dataPrev: `${user}`,
@@ -144,18 +143,18 @@ const changeStatus = async (id, status) => {
   if (!user) {
     const error = new Error(`No existe un usuario con el id ${id}`)
     error.statusCode = 404
-    throw error;
+    throw error
   }
 
   const userUpdate = await repositorieUser.updateStatus(id, status)
   if (!userUpdate) {
     const error = new Error(`No se pudo cambiar el estado al usuario con id: ${id}`)
     error.statusCode = 400
-    throw error;
+    throw error
   }
 
   const bodyBitacora = {
-    eventId: 'por definir',
+    eventId: null,
     tableAffect: 'users',
     fieldAffect: `${id}`,
     dataPrev: `${user}`,
@@ -177,18 +176,18 @@ const inactiveUser = async (id) => {
   if (!user) {
     const error = new Error(`No existe un usuario con el id ${id}`)
     error.statusCode = 404
-    throw error;
+    throw error
   }
 
   const userInactive = await repositorieUser.remove(id)
   if (!userInactive) {
     const error = new Error(`No se pudo inactivar el usuario con el id: ${id}`)
     error.statusCode = 400
-    throw error;
+    throw error
   }
 
   const bodyBitacora = {
-    eventId: 'por definir',
+    eventId: null,
     tableAffect: 'users',
     fieldAffect: 'state_id',
     dataPrev: '1',
@@ -207,18 +206,18 @@ const inactiveUser = async (id) => {
 const changePass = async (newpass, username) => {
   const user = await repositorieUser.listByUsername(username)
   if (!user) {
-    const error = new Error(`No existe un usuario con el id ${id}`)
+    const error = new Error(`No existe un usuario con el username ${username}`)
     error.statusCode = 404
-    throw error;
+    throw error
   }
 
   const salt = bcrypt.genSaltSync()
   const password = bcrypt.hashSync(newpass, salt)
   const userUpdate = await repositorieUser.update(user.uid, { password })
   if (!userUpdate) {
-    const error = new Error(`No se pudo inactivar el usuario con el id: ${id}`)
+    const error = new Error(`No se pudo inactivar el usuario con el username: ${username}`)
     error.statusCode = 400
-    throw error;
+    throw error
   }
 
   return 'Se realizo la actualizacion de la contraseña correctamente.'
